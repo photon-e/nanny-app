@@ -113,9 +113,9 @@ class ServiceAgreement(models.Model):
 class MonitoredMessage(models.Model):
     """Nanny-Parent Chat (Monitored) - all communication stays in app."""
     
-    booking = models.ForeignKey('families.Booking', on_delete=models.CASCADE, related_name='messages')
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    booking = models.ForeignKey('families.Booking', on_delete=models.CASCADE, related_name='monitored_messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_monitored_messages')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_monitored_messages')
     message = models.TextField()
     flagged = models.BooleanField(default=False, help_text="Flagged for review (harassment, private deal solicitation)")
     flagged_reason = models.TextField(blank=True)
