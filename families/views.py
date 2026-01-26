@@ -138,7 +138,7 @@ def create_booking(request, caregiver_id):
         caregiver_payout=caregiver_payout,
     )
     
-    # Auto-generate service agreement PDF
+    # Auto-generate service agreement PDF (works with or without reportlab)
     try:
         from core.utils import generate_service_agreement_pdf, send_service_agreement_email
         pdf_buffer = generate_service_agreement_pdf(booking)

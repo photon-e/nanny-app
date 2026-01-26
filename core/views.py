@@ -125,6 +125,8 @@ def trigger_panic_alert(request):
 @login_required
 def generate_booking_agreement(request, booking_id):
     """Generate and email service agreement PDF."""
+    from core.utils import generate_service_agreement_pdf, send_service_agreement_email
+    
     booking = get_object_or_404(Booking, id=booking_id)
     
     # Verify user is part of booking
