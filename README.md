@@ -53,6 +53,11 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+**Note:** `reportlab` is optional. The app works without it, but PDF generation will use a text format instead of PDF. To enable full PDF generation:
+```bash
+pip install reportlab
+```
+
 4. Run migrations:
 ```bash
 python manage.py makemigrations
