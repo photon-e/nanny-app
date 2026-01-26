@@ -4,16 +4,56 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils import timezone
 from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.pdfgen import canvas
 import os
+
+# Optional reportlab import for PDF generation
+try:
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    from reportlab.pdfgen import canvas
+    REPORTLAB_AVAILABLE = True
+except ImportError:
+    REPORTLAB_AVAILABLE = False
 
 
 def generate_service_agreement_pdf(booking):
     """Generate PDF Service Agreement for booking."""
+    if not REPORTLAB_AVAILABLE:
+        # Fallback: Generate a simple text version
+        content = f"""
+Service Agreement
+
+This Service Agreement is entered into on {timezone.now().strftime('%B %d, %Y')} between:
+
+Family: {booking.family.user.get_full_name() or booking.family.user.username}
+Caregiver: {booking.caregiver.user.get_full_name() or booking.caregiver.user.username}
+Service Date: {booking.service_date or 'TBD'}
+Amount: ₦{booking.amount}
+
+IMPORTANT LEGAL NOTICE:
+This platform acts solely as an agent facilitating the connection between families and caregivers.
+The platform is not a party to this agreement. The family and caregiver are contracting directly
+with each other. The platform assumes no liability for the services provided or any disputes
+that may arise between the parties.
+
+Terms:
+1. The caregiver agrees to provide childcare services as agreed upon.
+2. Payment is held in escrow until service completion.
+3. Both parties agree to abide by the platform's Code of Conduct.
+4. Any disputes should be reported through the platform's dispute resolution system.
+
+Signatures:
+Family: _________________________ Date: ___________
+Caregiver: _______________________ Date: ___________
+"""
+        buffer = BytesIO()
+        buffer.write(content.encode('utf-8'))
+        buffer.seek(0)
+        return buffer
+    
+    # Use reportlab if available
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
     
