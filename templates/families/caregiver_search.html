@@ -1,0 +1,135 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Find a Nanny{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-indigo-600 mb-2">Find a Nanny</h1>
+      <p class="text-gray-600">Search and filter verified caregivers</p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mb-6">
+      <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <input type="text" name="q" value="{{ search_q }}" placeholder="🔍 Name or keyword"
+               class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        <input type="text" name="location" value="{{ search_location }}" placeholder="📍 Location"
+               class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        <select name="verification" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <option value="">Any verification level</option>
+          <option value="gold" {% if search_verification == 'gold' %}selected{% endif %}>⭐ Gold (Verified)</option>
+          <option value="standard" {% if search_verification == 'standard' %}selected{% endif %}>✓ Standard</option>
+        </select>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold transition shadow-md">
+          Search
+        </button>
+      </form>
+    </div>
+
+    <!-- Results -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for c in caregivers %}
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 flex flex-col hover:shadow-xl transition">
+          <div class="flex-1">
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-xl text-gray-800">
+                  {{ c.user.get_full_name|default:c.user.username }}
+                </h3>
+                <p class="text-sm text-gray-500 flex items-center mt-1">
+                  <span class="mr-1">📍</span> {{ c.location|default:"Location not set" }}
+                </p>
+              </div>
+              {% if c.profile_image %}
+                <img src="{{ c.profile_image.url }}" class="w-16 h-16 rounded-full object-cover border-2 border-indigo-200">
+              {% else %}
+                <div class="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xl">
+                  {{ c.user.first_name|first|default:c.user.username|first|upper }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Verification Level Badge -->
+            <div class="mb-3">
+              {% if c.verified %}
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-300">
+                  ⭐ Gold Verified
+                </span>
+              {% elif c.registration_level >= 2 %}
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-300">
+                  ✓ Standard
+                </span>
+              {% else %}
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800 border border-gray-300">
+                  Basic
+                </span>
+              {% endif %}
+            </div>
+
+            <!-- Trust Scorecard -->
+            <div class="bg-gray-50 rounded-lg p-3 mb-4 border border-gray-200">
+              <p class="text-xs font-semibold text-gray-700 mb-2">Trust Score:</p>
+              <div class="space-y-1 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600">ID Verification</span>
+                  <span class="{% if c.has_id %}text-green-600{% else %}text-gray-400{% endif %}">
+                    {% if c.has_id %}✅ Verified{% else %}⚪ Pending{% endif %}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600">Guarantors</span>
+                  <span class="{% if c.has_guarantors %}text-green-600{% else %}text-gray-400{% endif %}">
+                    {% if c.has_guarantors %}✅ Verified{% else %}⚪ Pending{% endif %}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600">Live Selfie</span>
+                  <span class="{% if c.has_selfie %}text-green-600{% else %}text-gray-400{% endif %}">
+                    {% if c.has_selfie %}✅ Verified{% else %}⚪ Pending{% endif %}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bio -->
+            {% if c.bio %}
+              <p class="text-sm text-gray-600 line-clamp-3 mb-4">
+                {{ c.bio }}
+              </p>
+            {% endif %}
+
+            <!-- Experience & Rate -->
+            <div class="flex items-center justify-between text-sm text-gray-600 mb-4 border-t pt-3">
+              <span>Experience: {{ c.experience_years }} year{{ c.experience_years|pluralize }}</span>
+              {% if c.hourly_rate %}
+                <span class="font-bold text-indigo-600">₦{{ c.hourly_rate|floatformat:0 }}/hr</span>
+              {% else %}
+                <span class="text-gray-400">Rate not set</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <div class="border-t pt-4 mt-auto">
+            <a href="{% url 'create_booking' c.id %}"
+               class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center px-4 py-3 rounded-lg font-semibold transition shadow-md">
+              📅 Book Now
+            </a>
+            <p class="mt-2 text-[10px] text-gray-400 text-center">
+              💰 Payments secured via escrow • Funds released after safety window
+            </p>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-span-full bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center">
+          <p class="text-gray-500 text-lg mb-2">No caregivers match your search</p>
+          <p class="text-gray-400 text-sm">Try adjusting your filters or search terms</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

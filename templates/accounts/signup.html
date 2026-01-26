@@ -1,0 +1,97 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex items-center justify-center py-10 px-4">
+
+  <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-10">
+
+    <!-- LEFT SECTION -->
+    <div class="flex flex-col justify-center">
+      
+      <span class="text-indigo-600 font-semibold tracking-wide">
+        {% if role == 'Family' %} For Families {% else %} For Caregivers {% endif %}
+      </span>
+
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mt-2">
+        {% if role == 'Family' %}
+          Create your Family Account
+        {% else %}
+          Become a Trusted Caregiver
+        {% endif %}
+      </h1>
+
+      <p class="mt-3 text-gray-600 text-lg">
+        {% if role == 'Family' %}
+          Find verified, trusted caregivers with ease.
+        {% else %}
+          Connect with families and start earning.
+        {% endif %}
+      </p>
+
+      <!-- Trust Points -->
+      <div class="mt-6 space-y-4">
+        <div class="flex items-center space-x-3">
+          <span class="bg-green-500 text-white text-sm px-2 py-1 rounded-full">✓</span>
+          <p class="text-gray-700">Secure and encrypted platform</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span class="bg-green-500 text-white text-sm px-2 py-1 rounded-full">✓</span>
+          <p class="text-gray-700">Verified profiles</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span class="bg-green-500 text-white text-sm px-2 py-1 rounded-full">✓</span>
+          <p class="text-gray-700">Simple matching experience</p>
+        </div>
+      </div>
+
+      <img src="{% static 'img/caregiver-illustration.png' %}"
+           class="mt-8 rounded-2xl shadow-xl hidden md:block"
+           alt="Illustration"/>
+    </div>
+
+    <!-- RIGHT: FORM CARD -->
+    <div>
+      <div class="bg-white shadow-2xl rounded-2xl p-8">
+
+        <h2 class="text-2xl font-bold text-center text-indigo-600">
+          {% if role == 'Family' %} Family Signup {% else %} Caregiver Signup {% endif %}
+        </h2>
+
+        <p class="text-gray-500 text-center mb-6">
+          Fill your details to get started
+        </p>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+          {% csrf_token %}
+
+          {% for field in form %}
+          <div>
+            <label class="block text-gray-700 mb-1 font-medium">
+              {{ field.label }}
+            </label>
+
+            {{ field }}
+
+            {% if field.errors %}
+              <p class="text-red-500 text-sm mt-1">{{ field.errors.0 }}</p>
+            {% endif %}
+          </div>
+          {% endfor %}
+
+          <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg text-lg font-semibold transition">
+            Create Account
+          </button>
+        </form>
+
+        <p class="text-center mt-5 text-gray-600">
+  Already have an account?
+  <a href="{% url 'account_login' %}" class="text-indigo-600 font-semibold">Login</a>
+</p>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

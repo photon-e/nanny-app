@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Nanny Platform{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+
+<header class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold text-indigo-600">
+            Nanny
+        </a>
+
+        <nav class="space-x-4">
+    <a href="/caregivers/" class="text-gray-600 hover:text-indigo-600">Caregivers</a>
+
+    {% if user.is_authenticated %}
+        {% if user.is_caregiver %}
+            <a href="{% url 'caregiver_dashboard' %}" class="font-medium">Dashboard</a>
+        {% elif user.is_family %}
+            <a href="{% url 'family_dashboard' %}" class="font-medium">Dashboard</a>
+        {% endif %}
+        <a href="/messages/inbox/" class="font-medium">Inbox</a>
+        <a href="{% url 'account_logout' %}" class="text-red-500 font-medium">Logout</a>
+    {% else %}
+        <a href="/signup/caregiver/" class="font-medium">Become a Caregiver</a>
+        <a href="/signup/family/" class="font-medium">Find Care</a>
+        <a href="{% url 'account_login' %}" class="font-medium">Login</a>
+    {% endif %}
+</nav>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 py-8">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="bg-white border-t mt-12">
+    <div class="max-w-7xl mx-auto px-4 py-10 grid gap-8 md:grid-cols-4 text-sm text-gray-600">
+        <div>
+            <h2 class="text-base font-semibold text-gray-900 mb-3">About Nanny</h2>
+            <p class="mb-3">
+                Nanny helps families connect with trusted caregivers for childcare, nannying, and more.
+            </p>
+            <p class="text-xs text-gray-400">
+                This platform is for demonstration purposes and not a substitute for your own due diligence.
+            </p>
+        </div>
+
+        <div>
+            <h2 class="text-base font-semibold text-gray-900 mb-3">Explore</h2>
+            <ul class="space-y-2">
+                <li><a href="/caregivers/" class="hover:text-indigo-600">Browse caregivers</a></li>
+                <li><a href="/signup/family/" class="hover:text-indigo-600">For families</a></li>
+                <li><a href="/signup/caregiver/" class="hover:text-indigo-600">For caregivers</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h2 class="text-base font-semibold text-gray-900 mb-3">Support</h2>
+            <ul class="space-y-2">
+                <li><a href="#" class="hover:text-indigo-600">Help center</a></li>
+                <li><a href="#" class="hover:text-indigo-600">Safety tips</a></li>
+                <li><a href="#" class="hover:text-indigo-600">Contact us</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h2 class="text-base font-semibold text-gray-900 mb-3">Legal & Social</h2>
+            <ul class="space-y-2 mb-4">
+                <li><a href="#" class="hover:text-indigo-600">Terms of Service</a></li>
+                <li><a href="#" class="hover:text-indigo-600">Privacy Policy</a></li>
+                <li><a href="#" class="hover:text-indigo-600">Cookie Policy</a></li>
+            </ul>
+            <div class="flex space-x-4 text-gray-500">
+                <a href="#" class="hover:text-indigo-600">Facebook</a>
+                <a href="#" class="hover:text-indigo-600">Instagram</a>
+                <a href="#" class="hover:text-indigo-600">Twitter</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="border-t">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400 space-y-2 md:space-y-0">
+            <p>&copy; {{ now|date:"Y" }} Nanny. All rights reserved.</p>
+            <p>Made with care for families and caregivers.</p>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

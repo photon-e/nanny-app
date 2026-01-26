@@ -1,0 +1,79 @@
+{% extends "layout/base.html" %}
+
+{% block title %}{{ module.title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-10 px-4">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white shadow-2xl rounded-2xl p-8">
+            <div class="mb-6">
+                <a href="{% url 'training_modules' %}" class="text-indigo-600 hover:text-indigo-700 mb-4 inline-block">← Back to Training Modules</a>
+                <h1 class="text-3xl font-bold text-indigo-600 mb-2">{{ module.title }}</h1>
+                <p class="text-gray-600">{{ module.description }}</p>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-4 p-3 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Training Content -->
+            <div class="border-2 border-gray-200 rounded-lg p-6 mb-6 bg-gray-50 max-h-96 overflow-y-auto">
+                <div class="prose max-w-none whitespace-pre-line">{{ module.content }}</div>
+            </div>
+
+            <!-- Quiz Form -->
+            {% if questions %}
+            <div class="border-t-2 border-gray-200 pt-6">
+                <h2 class="text-2xl font-bold mb-4">Quiz</h2>
+                <p class="text-gray-600 mb-6">Answer all questions. You need 70% to pass.</p>
+                
+                <form method="POST" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    {% for question in questions %}
+                    <div class="border border-gray-200 rounded-lg p-4 bg-white">
+                        <h3 class="font-bold text-lg mb-3">{{ forloop.counter }}. {{ question.question }}</h3>
+                        
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="question_{{ question.id }}" value="A" class="mr-2" required>
+                                <span>A. {{ question.option_a }}</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="question_{{ question.id }}" value="B" class="mr-2" required>
+                                <span>B. {{ question.option_b }}</span>
+                            </label>
+                            {% if question.option_c %}
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="question_{{ question.id }}" value="C" class="mr-2" required>
+                                <span>C. {{ question.option_c }}</span>
+                            </label>
+                            {% endif %}
+                            {% if question.option_d %}
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="radio" name="question_{{ question.id }}" value="D" class="mr-2" required>
+                                <span>D. {{ question.option_d }}</span>
+                            </label>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg text-lg font-semibold transition">
+                        Submit Quiz
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="border-t-2 border-gray-200 pt-6">
+                <p class="text-gray-500">No quiz available for this module yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

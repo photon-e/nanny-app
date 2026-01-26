@@ -1,0 +1,127 @@
+{% extends "layout/base.html" %}
+{% block title %}Caregiver Profile{% endblock %}
+
+{% block content %}
+
+<div class="max-w-5xl mx-auto">
+
+    <!-- Profile Header -->
+    <div class="bg-white rounded-xl shadow p-8 mb-6">
+
+        <div class="flex flex-col md:flex-row gap-6 items-center">
+
+            <!-- Avatar / Image Placeholder -->
+            {% if caregiver.profile_image %}
+    <img src="{{ caregiver.profile_image.url }}"
+         class="w-32 h-32 rounded-full object-cover shadow">
+{% else %}
+    <div class="w-32 h-32 rounded-full bg-indigo-100 flex items-center justify-center text-4xl font-bold text-indigo-700">
+        {{ caregiver.user.first_name|default:caregiver.user.username|first }}
+    </div>
+{% endif %}
+
+            <div class="flex-1">
+                <h1 class="text-3xl font-bold">
+                    {{ caregiver.user.get_full_name|default:caregiver.user.username }}
+                </h1>
+
+                <p class="text-gray-600 mt-1">
+                    Professional Nanny & Child Care Provider
+                </p>
+
+                <div class="flex gap-4 mt-4 flex-wrap">
+                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+                        ✔ Verified Identity
+                    </span>
+
+                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                        ⭐ Background Check (Coming Soon)
+                    </span>
+
+                    <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                        🩺 First Aid Certified (Optional)
+                    </span>
+                </div>
+            </div>
+
+            {% if user.is_authenticated and user.is_family %}
+            <div>
+                <a href="{% url 'send_message' caregiver.user.id %}"
+                   class="bg-indigo-600 text-white px-6 py-3 rounded-lg">
+                    Message Caregiver
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="grid md:grid-cols-3 gap-6">
+
+        <!-- Left Column -->
+        <div class="bg-white rounded-xl shadow p-6 space-y-4">
+
+            <h2 class="text-lg font-semibold mb-2">Quick Info</h2>
+
+            <p>📍 <span class="font-semibold">Location:</span>
+                {{ caregiver.location|default:"Not provided" }}
+            </p>
+
+            <p>👶 <span class="font-semibold">Experience:</span>
+                {{ caregiver.experience_years }} years
+            </p>
+
+            <p>💰 <span class="font-semibold">Hourly Rate:</span>
+                ₦{{ caregiver.hourly_rate }}
+            </p>
+
+            <p>🕒 <span class="font-semibold">Availability:</span>
+                <span class="text-green-600">Available</span>
+            </p>
+
+            <hr>
+
+            <h2 class="text-lg font-semibold">Skills</h2>
+            <ul class="space-y-2 text-gray-700">
+                <li>• Infant & toddler care</li>
+                <li>• Homework support</li>
+                <li>• Meal preparation</li>
+                <li>• Special needs support (optional future)</li>
+            </ul>
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="md:col-span-2 bg-white rounded-xl shadow p-6">
+
+            <h2 class="text-xl font-bold mb-3">About Me</h2>
+
+            <p class="text-gray-700 leading-relaxed">
+                {{ caregiver.bio|default:"This caregiver has not added a bio yet." }}
+            </p>
+
+            <hr class="my-6">
+
+            <!-- Reviews Placeholder -->
+            <h2 class="text-xl font-bold mb-3">Reviews</h2>
+
+            <div class="bg-gray-50 border rounded-xl p-5 text-gray-600">
+                ⭐ Reviews are coming soon. Families will soon be able to rate caregivers here.
+            </div>
+
+            <hr class="my-6">
+
+            <!-- Safety Section -->
+            <h2 class="text-xl font-bold mb-3">Trust & Safety</h2>
+
+            <div class="space-y-2 text-gray-700">
+                <p>✔ Identity Verified</p>
+                <p>✔ Manual Profile Review</p>
+                <p>🔒 Secure Messaging Protected</p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

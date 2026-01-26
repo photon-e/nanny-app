@@ -1,0 +1,167 @@
+{% extends "layout/base.html" %}
+{% block title %}Find Trusted Nannies & Caregivers{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="text-center py-12">
+  <h1 class="text-4xl md:text-5xl font-bold text-gray-900">
+    Find Trusted Nannies & Caregivers Near You
+  </h1>
+  <p class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">
+    Safe, verified and professional child care providers ready to help your family thrive.
+  </p>
+
+  <div class="mt-6 flex justify-center gap-4">
+    <a href="/signup/family/"
+       class="bg-indigo-600 text-white px-6 py-3 rounded-lg text-lg">
+      Find a Caregiver
+    </a>
+
+    <a href="/signup/caregiver/"
+       class="bg-white border border-gray-300 px-6 py-3 rounded-lg text-lg">
+      Become a Caregiver
+    </a>
+  </div>
+
+  <p class="mt-4 text-sm text-gray-500">
+    Trusted by families across Nigeria (and growing!)
+  </p>
+</section>
+
+<!-- Stats -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center py-8">
+  <div class="bg-white p-6 shadow rounded-xl">
+    <h3 class="text-3xl font-bold text-indigo-600">500+</h3>
+    <p class="text-gray-600">Verified Nannies</p>
+  </div>
+
+  <div class="bg-white p-6 shadow rounded-xl">
+    <h3 class="text-3xl font-bold text-indigo-600">1,200+</h3>
+    <p class="text-gray-600">Families Served</p>
+  </div>
+
+  <div class="bg-white p-6 shadow rounded-xl">
+    <h3 class="text-3xl font-bold text-indigo-600">98%</h3>
+    <p class="text-gray-600">Satisfaction Rate</p>
+  </div>
+
+  <div class="bg-white p-6 shadow rounded-xl">
+    <h3 class="text-3xl font-bold text-indigo-600">24/7</h3>
+    <p class="text-gray-600">Support</p>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="py-10">
+  <h2 class="text-3xl font-bold text-center mb-6">Why Families Love Us</h2>
+
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="bg-white p-6 shadow rounded-xl">
+      <h3 class="font-semibold text-lg">Verified Caregivers</h3>
+      <p class="text-gray-600 mt-2">
+        Every caregiver passes identity checks and background screening.
+      </p>
+    </div>
+
+    <div class="bg-white p-6 shadow rounded-xl">
+      <h3 class="font-semibold text-lg">Secure Messaging</h3>
+      <p class="text-gray-600 mt-2">
+        Chat safely inside the platform before hiring.
+      </p>
+    </div>
+
+    <div class="bg-white p-6 shadow rounded-xl">
+      <h3 class="font-semibold text-lg">Smart Matching</h3>
+      <p class="text-gray-600 mt-2">
+        We connect you with caregivers that truly fit your needs.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Upcoming Features (placeholders but looks real) -->
+<section class="py-10">
+  <h2 class="text-3xl font-bold text-center mb-6">Coming Soon 🚀</h2>
+
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-200">
+      <h3 class="font-semibold text-lg text-indigo-700">In-App Payments</h3>
+      <p class="text-gray-700 mt-2">Pay safely inside the platform.</p>
+    </div>
+
+    <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-200">
+      <h3 class="font-semibold text-lg text-indigo-700">Caregiver Ratings</h3>
+      <p class="text-gray-700 mt-2">See reviews from real families.</p>
+    </div>
+
+    <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-200">
+      <h3 class="font-semibold text-lg text-indigo-700">Background Verification Badge</h3>
+      <p class="text-gray-700 mt-2">Certified trusted caregivers.</p>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-10">
+  <h2 class="text-3xl font-bold text-center mb-6">How It Works</h2>
+
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="bg-white p-6 shadow rounded-xl text-center">
+      <span class="text-3xl font-bold text-indigo-600">1</span>
+      <h4 class="font-semibold mt-2">Create an Account</h4>
+      <p class="text-gray-600 mt-1">Sign up as a family or caregiver.</p>
+    </div>
+
+    <div class="bg-white p-6 shadow rounded-xl text-center">
+      <span class="text-3xl font-bold text-indigo-600">2</span>
+      <h4 class="font-semibold mt-2">Connect</h4>
+      <p class="text-gray-600 mt-1">Browse caregivers & message them.</p>
+    </div>
+
+    <div class="bg-white p-6 shadow rounded-xl text-center">
+      <span class="text-3xl font-bold text-indigo-600">3</span>
+      <h4 class="font-semibold mt-2">Hire Safely</h4>
+      <p class="text-gray-600 mt-1">Agree on terms & get started.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-10">
+  <h2 class="text-3xl font-bold text-center mb-6">Loved By Families ❤️</h2>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-white p-6 shadow rounded-xl">
+      <p class="text-gray-700">
+        “Finding a nanny used to be stressful. Now it takes minutes. Amazing platform!”
+      </p>
+      <p class="mt-3 font-semibold">— Sarah, Abuja</p>
+    </div>
+
+    <div class="bg-white p-6 shadow rounded-xl">
+      <p class="text-gray-700">
+        “I feel safe leaving my kids because everyone here is verified.”
+      </p>
+      <p class="mt-3 font-semibold">— Musa, Lagos</p>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action -->
+<section class="text-center py-12">
+  <h2 class="text-3xl font-bold">Start Your Journey Today</h2>
+  <p class="text-gray-600 mt-2">Whether you need care or want to provide it, we’ve got you.</p>
+
+  <div class="mt-5 flex justify-center gap-4">
+    <a href="/signup/family/" class="bg-indigo-600 text-white px-6 py-3 rounded-lg text-lg">
+      Get Started
+    </a>
+
+    <a href="/caregivers/" class="border border-gray-400 px-6 py-3 rounded-lg text-lg">
+      Browse Caregivers
+    </a>
+  </div>
+</section>
+
+{% endblock %}
