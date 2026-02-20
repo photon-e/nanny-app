@@ -4,12 +4,12 @@
 {% block title %}Login — Nanny Platform{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-10 px-4">
+<div class="min-h-screen flex items-center justify-center bg-off-white py-10 px-4">
 
   <div class="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-md">
 
       <!-- Heading -->
-      <h2 class="text-3xl font-bold text-center text-indigo-600">
+      <h2 class="text-3xl font-bold text-center text-soft-teal">
         Welcome Back
       </h2>
       <p class="text-gray-500 text-center mt-1">
@@ -38,7 +38,7 @@
         {% endfor %}
 
         <button
-          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg text-lg font-semibold transition">
+          class="w-full bg-soft-teal hover:bg-teal-dark text-white py-3 rounded-lg text-lg font-semibold transition shadow-md hover:shadow-lg">
           Login
         </button>
       </form>
@@ -47,19 +47,19 @@
       <div class="mt-6 text-center text-gray-600 text-sm">
         <p>
           Forgot password?
-          <a href="{% url 'account_reset_password' %}" class="text-indigo-600 font-semibold">
+          <a href="{% url 'account_reset_password' %}" class="text-soft-teal font-semibold hover:text-teal-dark transition">
             Reset here
           </a>
         </p>
 
         <p class="mt-2 text-center text-gray-600">
   Don't have an account? 
-  <a href="/signup/family/" class="text-indigo-600 font-semibold">Create a Family Account</a>
+  <a href="/signup/family/" class="text-soft-teal font-semibold hover:text-teal-dark transition">Create a Family Account</a>
 </p>
 
 <p class="mt-1 text-center text-gray-600">
   Are you a caregiver? 
-  <a href="/signup/caregiver/" class="text-indigo-600 font-semibold">Register here</a>
+  <a href="/signup/caregiver/" class="text-soft-teal font-semibold hover:text-teal-dark transition">Register here</a>
 </p>
 
         

@@ -3,7 +3,7 @@
 {% block title %}Level 3 Registration - Guarantors{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 flex items-center justify-center py-10 px-4">
+<div class="min-h-screen bg-off-white flex items-center justify-center py-10 px-4">
     <div class="max-w-2xl w-full">
         <!-- Progress Indicator -->
         <div class="mb-8">
@@ -17,16 +17,16 @@
                     <div class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-bold">✓</div>
                     <span class="ml-2 font-semibold text-green-600">Identity</span>
                 </div>
-                <div class="w-16 h-1 bg-indigo-600"></div>
+                <div class="w-16 h-1 bg-soft-teal"></div>
                 <div class="flex items-center">
-                    <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">3</div>
-                    <span class="ml-2 font-semibold text-indigo-600">Guarantors</span>
+                    <div class="w-10 h-10 rounded-full bg-soft-teal text-white flex items-center justify-center font-bold">3</div>
+                    <span class="ml-2 font-semibold text-soft-teal">Guarantors</span>
                 </div>
             </div>
         </div>
 
         <div class="bg-white shadow-2xl rounded-2xl p-8">
-            <h2 class="text-2xl font-bold text-center text-indigo-600 mb-2">
+            <h2 class="text-2xl font-bold text-center text-soft-teal mb-2">
                 Level 3: Guarantors Information
             </h2>
             <p class="text-gray-500 text-center mb-6">
@@ -45,8 +45,8 @@
                 {% csrf_token %}
 
                 <!-- Guarantor 1 -->
-                <div class="border-2 border-indigo-100 rounded-lg p-6 bg-indigo-50">
-                    <h3 class="text-lg font-bold text-indigo-700 mb-4">Guarantor 1</h3>
+                <div class="border-2 border-soft-teal/30 rounded-lg p-6 bg-teal-light/20">
+                    <h3 class="text-lg font-bold text-teal-dark mb-4">Guarantor 1</h3>
                     
                     <div class="space-y-4">
                         <div>
@@ -83,8 +83,8 @@
                 </div>
 
                 <!-- Guarantor 2 -->
-                <div class="border-2 border-indigo-100 rounded-lg p-6 bg-indigo-50">
-                    <h3 class="text-lg font-bold text-indigo-700 mb-4">Guarantor 2</h3>
+                <div class="border-2 border-soft-teal/30 rounded-lg p-6 bg-teal-light/20">
+                    <h3 class="text-lg font-bold text-teal-dark mb-4">Guarantor 2</h3>
                     
                     <div class="space-y-4">
                         <div>
@@ -124,7 +124,7 @@
                     <a href="{% url 'caregiver_registration_level2' %}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-lg text-center font-semibold transition">
                         Back
                     </a>
-                    <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg text-lg font-semibold transition">
+                    <button type="submit" class="flex-1 bg-soft-teal hover:bg-teal-dark text-white py-3 rounded-lg text-lg font-semibold transition">
                         Complete Registration
                     </button>
                 </div>

@@ -5,31 +5,51 @@
     <title>{% block title %}Nanny Platform{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-teal': '#4FD1C7',
+                        'teal-light': '#81E6D9',
+                        'teal-dark': '#38B2AC',
+                        'navy': '#1E3A8A',
+                        'navy-light': '#3B82F6',
+                        'navy-dark': '#1E40AF',
+                        'terracotta': '#C85D3D',
+                        'terracotta-light': '#E07A5F',
+                        'terracotta-dark': '#A0452E',
+                        'off-white': '#FAF9F6',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-off-white text-gray-800">
 
-<header class="bg-white shadow">
+<header class="bg-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <a href="/" class="text-2xl font-bold text-indigo-600">
+        <a href="/" class="text-2xl font-bold text-soft-teal hover:text-teal-dark transition">
             Nanny
         </a>
 
         <nav class="space-x-4">
-    <a href="/caregivers/" class="text-gray-600 hover:text-indigo-600">Caregivers</a>
+    <a href="/caregivers/" class="text-gray-600 hover:text-soft-teal transition">Caregivers</a>
 
     {% if user.is_authenticated %}
         {% if user.is_caregiver %}
-            <a href="{% url 'caregiver_dashboard' %}" class="font-medium">Dashboard</a>
+            <a href="{% url 'caregiver_dashboard' %}" class="font-medium text-gray-700 hover:text-soft-teal transition">Dashboard</a>
         {% elif user.is_family %}
-            <a href="{% url 'family_dashboard' %}" class="font-medium">Dashboard</a>
+            <a href="{% url 'family_dashboard' %}" class="font-medium text-gray-700 hover:text-soft-teal transition">Dashboard</a>
         {% endif %}
-        <a href="/messages/inbox/" class="font-medium">Inbox</a>
-        <a href="{% url 'account_logout' %}" class="text-red-500 font-medium">Logout</a>
+        <a href="/messages/inbox/" class="font-medium text-gray-700 hover:text-soft-teal transition">Inbox</a>
+        <a href="{% url 'account_logout' %}" class="text-red-500 font-medium hover:text-red-600 transition">Logout</a>
     {% else %}
-        <a href="/signup/caregiver/" class="font-medium">Become a Caregiver</a>
-        <a href="/signup/family/" class="font-medium">Find Care</a>
-        <a href="{% url 'account_login' %}" class="font-medium">Login</a>
+        <a href="/signup/caregiver/" class="font-medium text-gray-700 hover:text-soft-teal transition">Become a Caregiver</a>
+        <a href="/signup/family/" class="font-medium text-gray-700 hover:text-soft-teal transition">Find Care</a>
+        <a href="{% url 'account_login' %}" class="font-medium text-gray-700 hover:text-soft-teal transition">Login</a>
     {% endif %}
 </nav>
     </div>
@@ -39,7 +59,7 @@
     {% block content %}{% endblock %}
 </main>
 
-<footer class="bg-white border-t mt-12">
+<footer class="bg-white border-t border-gray-200 mt-12">
     <div class="max-w-7xl mx-auto px-4 py-10 grid gap-8 md:grid-cols-4 text-sm text-gray-600">
         <div>
             <h2 class="text-base font-semibold text-gray-900 mb-3">About Nanny</h2>
@@ -54,39 +74,39 @@
         <div>
             <h2 class="text-base font-semibold text-gray-900 mb-3">Explore</h2>
             <ul class="space-y-2">
-                <li><a href="/caregivers/" class="hover:text-indigo-600">Browse caregivers</a></li>
-                <li><a href="/signup/family/" class="hover:text-indigo-600">For families</a></li>
-                <li><a href="/signup/caregiver/" class="hover:text-indigo-600">For caregivers</a></li>
+                <li><a href="/caregivers/" class="hover:text-soft-teal transition">Browse caregivers</a></li>
+                <li><a href="/signup/family/" class="hover:text-soft-teal transition">For families</a></li>
+                <li><a href="/signup/caregiver/" class="hover:text-soft-teal transition">For caregivers</a></li>
             </ul>
         </div>
 
         <div>
             <h2 class="text-base font-semibold text-gray-900 mb-3">Support</h2>
             <ul class="space-y-2">
-                <li><a href="#" class="hover:text-indigo-600">Help center</a></li>
-                <li><a href="#" class="hover:text-indigo-600">Safety tips</a></li>
-                <li><a href="#" class="hover:text-indigo-600">Contact us</a></li>
+                <li><a href="#" class="hover:text-soft-teal transition">Help center</a></li>
+                <li><a href="#" class="hover:text-soft-teal transition">Safety tips</a></li>
+                <li><a href="#" class="hover:text-soft-teal transition">Contact us</a></li>
             </ul>
         </div>
 
-        <div>
-            <h2 class="text-base font-semibold text-gray-900 mb-3">Legal & Social</h2>
+        <div class="bg-navy text-white p-6 rounded-lg">
+            <h2 class="text-base font-semibold mb-3">Legal & Social</h2>
             <ul class="space-y-2 mb-4">
-                <li><a href="#" class="hover:text-indigo-600">Terms of Service</a></li>
-                <li><a href="#" class="hover:text-indigo-600">Privacy Policy</a></li>
-                <li><a href="#" class="hover:text-indigo-600">Cookie Policy</a></li>
+                <li><a href="#" class="hover:text-teal-light transition">Terms of Service</a></li>
+                <li><a href="#" class="hover:text-teal-light transition">Privacy Policy</a></li>
+                <li><a href="#" class="hover:text-teal-light transition">Cookie Policy</a></li>
             </ul>
-            <div class="flex space-x-4 text-gray-500">
-                <a href="#" class="hover:text-indigo-600">Facebook</a>
-                <a href="#" class="hover:text-indigo-600">Instagram</a>
-                <a href="#" class="hover:text-indigo-600">Twitter</a>
+            <div class="flex space-x-4 text-teal-light">
+                <a href="#" class="hover:text-white transition">Facebook</a>
+                <a href="#" class="hover:text-white transition">Instagram</a>
+                <a href="#" class="hover:text-white transition">Twitter</a>
             </div>
         </div>
     </div>
 
-    <div class="border-t">
+    <div class="border-t border-gray-200">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400 space-y-2 md:space-y-0">
-            <p>&copy; {{ now|date:"Y" }} Nanny. All rights reserved.</p>
+            <p>&copy; {% now "Y" as current_year %}{{ current_year }} Nanny. All rights reserved.</p>
             <p>Made with care for families and caregivers.</p>
         </div>
     </div>

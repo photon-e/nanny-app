@@ -2,14 +2,14 @@
 {% load static %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 flex items-center justify-center py-10 px-4">
+<div class="min-h-screen bg-off-white flex items-center justify-center py-10 px-4">
 
   <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-10">
 
     <!-- LEFT SECTION -->
     <div class="flex flex-col justify-center">
       
-      <span class="text-indigo-600 font-semibold tracking-wide">
+      <span class="text-soft-teal font-semibold tracking-wide">
         {% if role == 'Family' %} For Families {% else %} For Caregivers {% endif %}
       </span>
 
@@ -54,7 +54,7 @@
     <div>
       <div class="bg-white shadow-2xl rounded-2xl p-8">
 
-        <h2 class="text-2xl font-bold text-center text-indigo-600">
+        <h2 class="text-2xl font-bold text-center text-soft-teal">
           {% if role == 'Family' %} Family Signup {% else %} Caregiver Signup {% endif %}
         </h2>
 
@@ -79,14 +79,14 @@
           </div>
           {% endfor %}
 
-          <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg text-lg font-semibold transition">
+          <button class="w-full bg-soft-teal hover:bg-teal-dark text-white py-3 rounded-lg text-lg font-semibold transition shadow-md hover:shadow-lg">
             Create Account
           </button>
         </form>
 
         <p class="text-center mt-5 text-gray-600">
   Already have an account?
-  <a href="{% url 'account_login' %}" class="text-indigo-600 font-semibold">Login</a>
+  <a href="{% url 'account_login' %}" class="text-soft-teal font-semibold hover:text-teal-dark transition">Login</a>
 </p>
 
       </div>

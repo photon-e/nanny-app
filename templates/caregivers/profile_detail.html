@@ -15,8 +15,8 @@
     <img src="{{ caregiver.profile_image.url }}"
          class="w-32 h-32 rounded-full object-cover shadow">
 {% else %}
-    <div class="w-32 h-32 rounded-full bg-indigo-100 flex items-center justify-center text-4xl font-bold text-indigo-700">
-        {{ caregiver.user.first_name|default:caregiver.user.username|first }}
+    <div class="w-32 h-32 rounded-full bg-teal-light/30 flex items-center justify-center text-4xl font-bold text-soft-teal border-2 border-soft-teal">
+        {{ caregiver.user.first_name|default:caregiver.user.username|first|upper }}
     </div>
 {% endif %}
 
@@ -30,24 +30,28 @@
                 </p>
 
                 <div class="flex gap-4 mt-4 flex-wrap">
-                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+                    {% if caregiver.verified %}
+                    <span class="bg-navy text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
                         ✔ Verified Identity
                     </span>
-
-                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
-                        ⭐ Background Check (Coming Soon)
+                    {% endif %}
+                    {% if caregiver.registration_level >= 2 %}
+                    <span class="bg-navy/80 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
+                        ⭐ ID Verified
                     </span>
-
-                    <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
-                        🩺 First Aid Certified (Optional)
+                    {% endif %}
+                    {% if caregiver.guarantors.count >= 2 %}
+                    <span class="bg-navy/60 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
+                        🛡️ Guarantors Verified
                     </span>
+                    {% endif %}
                 </div>
             </div>
 
             {% if user.is_authenticated and user.is_family %}
             <div>
                 <a href="{% url 'send_message' caregiver.user.id %}"
-                   class="bg-indigo-600 text-white px-6 py-3 rounded-lg">
+                   class="bg-soft-teal text-white px-6 py-3 rounded-lg">
                     Message Caregiver
                 </a>
             </div>
@@ -105,7 +109,7 @@
             <!-- Reviews Placeholder -->
             <h2 class="text-xl font-bold mb-3">Reviews</h2>
 
-            <div class="bg-gray-50 border rounded-xl p-5 text-gray-600">
+            <div class="bg-off-white border rounded-xl p-5 text-gray-600">
                 ⭐ Reviews are coming soon. Families will soon be able to rate caregivers here.
             </div>
 

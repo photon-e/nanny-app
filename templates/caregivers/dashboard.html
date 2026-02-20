@@ -4,19 +4,19 @@
 {% block title %}Caregiver Dashboard{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 flex">
+<div class="min-h-screen bg-off-white flex">
 
     <!-- SIDEBAR -->
     <aside class="w-80 hidden md:block bg-white border-r h-screen sticky top-0 p-6">
         <div class="text-center">
-            {% if profile.profile_picture %}
-                <img src="{{ profile.profile_picture.url }}"
+            {% if profile.profile_image %}
+                <img src="{{ profile.profile_image.url }}"
                      class="w-28 h-28 rounded-full mx-auto object-cover shadow"
                      alt="Profile Picture">
             {% else %}
-                <img src="{% static 'img/profile-placeholder.png' %}"
-                     class="w-28 h-28 rounded-full mx-auto shadow"
-                     alt="Profile Placeholder">
+                <div class="w-28 h-28 rounded-full bg-teal-light/30 flex items-center justify-center text-soft-teal font-bold text-3xl mx-auto shadow border-2 border-soft-teal">
+                    {{ profile.user.first_name|first|default:profile.user.username|first|upper }}
+                </div>
             {% endif %}
 
             <h2 class="mt-4 text-xl font-bold text-gray-800">
@@ -29,22 +29,22 @@
         </div>
 
         <nav class="mt-10 space-y-2">
-            <a href="#overview" class="block px-4 py-2 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 font-medium">
+            <a href="#overview" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">
                 Overview
             </a>
-            <a href="#families" class="block px-4 py-2 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 font-medium">
+            <a href="#families" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">
                 Assigned Families
             </a>
-            <a href="#messages" class="block px-4 py-2 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 font-medium">
+            <a href="#messages" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">
                 Messages
             </a>
-            <a href="{% url 'training_modules' %}" class="block px-4 py-2 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 font-medium">
+            <a href="{% url 'training_modules' %}" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">
                 Training Modules
             </a>
-            <a href="{% url 'earnings_wallet' %}" class="block px-4 py-2 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 font-medium">
+            <a href="{% url 'earnings_wallet' %}" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">
                 Earnings Wallet
             </a>
-            <a href="#profile" class="block px-4 py-2 rounded-lg hover:bg-indigo-100 hover:text-indigo-700 font-medium">
+            <a href="#profile" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">
                 Edit Profile
             </a>
         </nav>
@@ -76,20 +76,22 @@
                            class="sr-only peer" 
                            {% if profile.is_available %}checked{% endif %}
                            onchange="toggleAvailability()">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-soft-teal/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-soft-teal"></div>
                     <span class="ml-3 text-sm font-medium text-gray-700" id="availability-status">
                         {% if profile.is_available %}Available{% else %}Unavailable{% endif %}
                     </span>
                 </label>
             </div>
             {% if profile.verified %}
-            <div class="mt-4 flex items-center space-x-2 text-green-600">
-                <span class="font-bold">✓ Verified</span>
+            <div class="mt-4 flex items-center space-x-2">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-navy text-white border-2 border-navy shadow-sm">
+                    ✓ Verified
+                </span>
             </div>
             {% else %}
             <div class="mt-4">
                 <p class="text-sm text-gray-600">Complete training modules to get verified.</p>
-                <a href="{% url 'training_modules' %}" class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">Start Training →</a>
+                <a href="{% url 'training_modules' %}" class="text-soft-teal hover:text-teal-dark text-sm font-medium transition">Start Training →</a>
             </div>
             {% endif %}
         </section>
@@ -163,7 +165,7 @@
                         {{ field.label }}
                     </label>
 
-                    <div class="border rounded-lg px-3 py-2 bg-gray-50">
+                    <div class="border rounded-lg px-3 py-2 bg-off-white">
                         {{ field }}
                     </div>
 
@@ -173,7 +175,7 @@
                 </div>
                 {% endfor %}
 
-                <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold">
+                <button class="w-full bg-soft-teal hover:bg-teal-dark text-white py-3 rounded-lg font-semibold">
                     Save Changes
                 </button>
             </form>

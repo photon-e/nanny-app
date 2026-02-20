@@ -3,8 +3,8 @@
 {% block title %}Family Dashboard{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-8">
-  <h1 class="text-3xl font-bold mb-6">Family Dashboard</h1>
+<div class="min-h-screen bg-off-white py-8">
+  <h1 class="text-3xl font-bold mb-6 text-soft-teal">Family Dashboard</h1>
 
   {% if messages %}
     {% for message in messages %}
@@ -28,7 +28,7 @@
         <form method="post" class="space-y-4">
           {% csrf_token %}
           {{ form.as_p }}
-          <button class="bg-indigo-600 text-white px-4 py-2 rounded">
+          <button class="bg-soft-teal hover:bg-teal-dark text-white px-4 py-2 rounded-lg transition shadow-md">
             Save
           </button>
         </form>
@@ -46,7 +46,7 @@
           <input type="text" name="full_name" placeholder="Full name" class="w-full border rounded px-3 py-2 text-sm" required>
           <input type="text" name="relationship" placeholder="Relationship (e.g., Auntie, Driver)" class="w-full border rounded px-3 py-2 text-sm">
           <input type="file" name="photo" class="w-full text-sm">
-          <button class="bg-indigo-600 text-white px-3 py-2 rounded text-sm">
+          <button class="bg-soft-teal hover:bg-teal-dark text-white px-3 py-2 rounded-lg text-sm transition shadow-md">
             Add Authorized Pick-up
           </button>
         </form>
@@ -77,14 +77,14 @@
       <div class="bg-white p-6 rounded-xl shadow">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold">Find a Nanny</h3>
-          <a href="{% url 'caregiver_search' %}" class="text-indigo-600 text-sm hover:text-indigo-700">
+          <a href="{% url 'caregiver_search' %}" class="text-soft-teal text-sm hover:text-teal-dark transition">
             Open full search →
           </a>
         </div>
         <p class="text-sm text-gray-600 mb-4">
           Smart search by location and verification level. Payments are handled securely through escrow.
         </p>
-        <a href="{% url 'caregiver_search' %}" class="inline-flex items-center bg-indigo-600 text-white px-4 py-2 rounded">
+        <a href="{% url 'caregiver_search' %}" class="inline-flex items-center bg-soft-teal hover:bg-teal-dark text-white px-4 py-2 rounded-lg transition shadow-md">
           Smart Search & Filters
         </a>
       </div>
