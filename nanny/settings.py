@@ -63,6 +63,9 @@ SITE_ID = 1
 
 AUTH_USER_MODEL = 'accounts.User'
 
+# django-allauth: require email on signup
+ACCOUNT_EMAIL_REQUIRED = True
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -133,7 +133,7 @@ def send_service_agreement_email(booking, pdf_buffer):
     This agreement outlines the terms and conditions of the service.
     
     Best regards,
-    Nanny Platform Team
+    Kinshields Team
     """
     
     try:

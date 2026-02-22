@@ -1,6 +1,6 @@
-# Nanny Platform
+# Kinshields
 
-A comprehensive nanny/caregiver matching platform with tiered registration, verification, escrow payments, and admin management features.
+Kinshields is a comprehensive nanny/caregiver matching platform with tiered registration, verification, escrow payments, and admin management features.
 
 ## Features
 

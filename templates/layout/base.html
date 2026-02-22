@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Nanny Platform{% endblock %}</title>
+    <title>{% block title %}Kinshields{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -32,7 +32,7 @@
 <header class="bg-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
         <a href="/" class="text-2xl font-bold text-soft-teal hover:text-teal-dark transition">
-            Nanny
+            Kinshields
         </a>
 
         <nav class="space-x-4">
@@ -51,9 +51,47 @@
         <a href="/signup/family/" class="font-medium text-gray-700 hover:text-soft-teal transition">Find Care</a>
         <a href="{% url 'account_login' %}" class="font-medium text-gray-700 hover:text-soft-teal transition">Login</a>
     {% endif %}
-</nav>
+        </nav>
     </div>
 </header>
+
+<!-- Header Carousel -->
+<div class="relative w-full overflow-hidden bg-gray-200">
+    <div class="carousel-container relative" style="height: 320px;">
+        <div class="carousel-slide absolute inset-0 opacity-100 transition-opacity duration-700" data-slide="0">
+            <img src="https://placehold.co/1200x320/4FD1C7/1E3A8A?text=1200%C3%97320+Banner" alt="Hero 1" class="w-full h-full object-cover">
+        </div>
+        <div class="carousel-slide absolute inset-0 opacity-0 transition-opacity duration-700" data-slide="1">
+            <img src="https://placehold.co/1200x320/38B2AC/FAF9F6?text=1200%C3%97320+Banner" alt="Hero 2" class="w-full h-full object-cover">
+        </div>
+        <div class="carousel-slide absolute inset-0 opacity-0 transition-opacity duration-700" data-slide="2">
+            <img src="https://placehold.co/1200x320/C85D3D/FFFFFF?text=1200%C3%97320+Banner" alt="Hero 3" class="w-full h-full object-cover">
+        </div>
+        <div class="carousel-indicators absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+            <button type="button" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/80 hover:bg-white transition" data-index="0" aria-label="Slide 1"></button>
+            <button type="button" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition" data-index="1" aria-label="Slide 2"></button>
+            <button type="button" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white transition" data-index="2" aria-label="Slide 3"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var slides = document.querySelectorAll('.carousel-slide');
+    var dots = document.querySelectorAll('.carousel-dot');
+    var current = 0;
+    var total = slides.length;
+
+    function show(n) {
+        current = (n + total) % total;
+        slides.forEach(function(s, i) { s.classList.toggle('opacity-100', i === current); s.classList.toggle('opacity-0', i !== current); });
+        dots.forEach(function(d, i) { d.classList.toggle('bg-white/80', i === current); d.classList.toggle('bg-white/40', i !== current); });
+    }
+
+    dots.forEach(function(dot, i) { dot.addEventListener('click', function() { show(i); }); });
+    setInterval(function() { show(current + 1); }, 5000);
+})();
+</script>
 
 <main class="max-w-7xl mx-auto px-4 py-8">
     {% block content %}{% endblock %}
@@ -62,9 +100,9 @@
 <footer class="bg-white border-t border-gray-200 mt-12">
     <div class="max-w-7xl mx-auto px-4 py-10 grid gap-8 md:grid-cols-4 text-sm text-gray-600">
         <div>
-            <h2 class="text-base font-semibold text-gray-900 mb-3">About Nanny</h2>
+            <h2 class="text-base font-semibold text-gray-900 mb-3">About Kinshields</h2>
             <p class="mb-3">
-                Nanny helps families connect with trusted caregivers for childcare, nannying, and more.
+                Kinshields helps families connect with trusted caregivers for childcare, nannying, and more.
             </p>
             <p class="text-xs text-gray-400">
                 This platform is for demonstration purposes and not a substitute for your own due diligence.
@@ -106,7 +144,7 @@
 
     <div class="border-t border-gray-200">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400 space-y-2 md:space-y-0">
-            <p>&copy; {% now "Y" as current_year %}{{ current_year }} Nanny. All rights reserved.</p>
+            <p>&copy; {% now "Y" as current_year %}{{ current_year }} Kinshields. All rights reserved.</p>
             <p>Made with care for families and caregivers.</p>
         </div>
     </div>
