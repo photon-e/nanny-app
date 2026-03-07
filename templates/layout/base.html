@@ -30,36 +30,50 @@
 <body class="bg-off-white text-gray-800">
 
 <header class="bg-white shadow-md">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <a href="/" class="text-2xl font-bold text-soft-teal hover:text-teal-dark transition">
-            Kinshields
-        </a>
+    <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+            <a href="/" class="text-2xl font-bold text-soft-teal hover:text-teal-dark transition">
+                Kinshields
+            </a>
 
-        <nav class="space-x-4">
-    <a href="/caregivers/" class="text-gray-600 hover:text-soft-teal transition">Caregivers</a>
+            <button
+                id="mobile-menu-toggle"
+                type="button"
+                class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-soft-teal hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-soft-teal"
+                aria-controls="mobile-menu"
+                aria-expanded="false"
+            >
+                <span class="sr-only">Toggle navigation</span>
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
 
-    {% if user.is_authenticated %}
-        {% if user.is_caregiver %}
-            <a href="{% url 'caregiver_dashboard' %}" class="font-medium text-gray-700 hover:text-soft-teal transition">Dashboard</a>
-        {% elif user.is_family %}
-            <a href="{% url 'family_dashboard' %}" class="font-medium text-gray-700 hover:text-soft-teal transition">Dashboard</a>
-        {% endif %}
-        <a href="/messages/inbox/" class="font-medium text-gray-700 hover:text-soft-teal transition">Inbox</a>
-        <a href="{% url 'account_logout' %}" class="text-red-500 font-medium hover:text-red-600 transition">Logout</a>
-    {% else %}
-        <a href="/signup/caregiver/" class="font-medium text-gray-700 hover:text-soft-teal transition">Become a Caregiver</a>
-        <a href="/signup/family/" class="font-medium text-gray-700 hover:text-soft-teal transition">Find Care</a>
-        <a href="{% url 'account_login' %}" class="font-medium text-gray-700 hover:text-soft-teal transition">Login</a>
-    {% endif %}
+            <nav class="hidden md:flex items-center space-x-4">
+                {% include 'layout/nav_links.html' with
+                    link_class='text-sm font-medium text-gray-700 hover:text-soft-teal transition'
+                    danger_class='text-sm font-medium text-red-500 hover:text-red-600 transition'
+                %}
+            </nav>
+        </div>
+
+        <nav
+            id="mobile-menu"
+            class="mt-3 flex flex-col space-y-1 md:hidden hidden bg-white border border-gray-200 rounded-lg p-2"
+        >
+            {% include 'layout/nav_links.html' with
+                link_class='block w-full text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-soft-teal transition'
+                danger_class='block w-full text-left px-3 py-2 rounded-md text-red-500 hover:bg-red-50 hover:text-red-600 transition'
+            %}
         </nav>
     </div>
 </header>
 
 <!-- Header Carousel -->
 <div class="relative w-full overflow-hidden bg-gray-200">
-    <div class="carousel-container relative" style="height: 320px;">
+    <div class="carousel-container relative h-48 md:h-64 lg:h-80">
         <div class="carousel-slide absolute inset-0 opacity-100 transition-opacity duration-700" data-slide="0">
-            <img src="/media/{{  'nanny-mum.jpg' }}">
+            <img src="/media/{{ 'nanny-mum.jpg' }}" alt="Kinshields hero" class="w-full h-full object-cover">
         </div>
         <div class="carousel-slide absolute inset-0 opacity-0 transition-opacity duration-700" data-slide="1">
             <img src="https://placehold.co/1200x320/38B2AC/FAF9F6?text=1200%C3%97320+Banner" alt="Hero 2" class="w-full h-full object-cover">
@@ -84,12 +98,37 @@
 
     function show(n) {
         current = (n + total) % total;
-        slides.forEach(function(s, i) { s.classList.toggle('opacity-100', i === current); s.classList.toggle('opacity-0', i !== current); });
-        dots.forEach(function(d, i) { d.classList.toggle('bg-white/80', i === current); d.classList.toggle('bg-white/40', i !== current); });
+        slides.forEach(function(s, i) {
+            s.classList.toggle('opacity-100', i === current);
+            s.classList.toggle('opacity-0', i !== current);
+        });
+        dots.forEach(function(d, i) {
+            d.classList.toggle('bg-white/80', i === current);
+            d.classList.toggle('bg-white/40', i !== current);
+        });
     }
 
-    dots.forEach(function(dot, i) { dot.addEventListener('click', function() { show(i); }); });
+    dots.forEach(function(dot, i) {
+        dot.addEventListener('click', function() { show(i); });
+    });
     setInterval(function() { show(current + 1); }, 5000);
+})();
+
+(function() {
+    var toggle = document.getElementById('mobile-menu-toggle');
+    var menu = document.getElementById('mobile-menu');
+    if (!toggle || !menu) return;
+
+    toggle.addEventListener('click', function() {
+        var isHidden = menu.classList.contains('hidden');
+        if (isHidden) {
+            menu.classList.remove('hidden');
+            toggle.setAttribute('aria-expanded', 'true');
+        } else {
+            menu.classList.add('hidden');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    });
 })();
 </script>
 
