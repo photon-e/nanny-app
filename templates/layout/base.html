@@ -49,22 +49,46 @@
                 </svg>
             </button>
 
-            <nav class="hidden md:flex items-center space-x-4">
-                {% include 'layout/nav_links.html' with
-                    link_class='text-sm font-medium text-gray-700 hover:text-soft-teal transition'
-                    danger_class='text-sm font-medium text-red-500 hover:text-red-600 transition'
-                %}
+            <nav class="hidden md:flex items-center justify-end gap-x-4 gap-y-2 flex-wrap">
+                <a href="{% url 'caregiver_list' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Browse caregivers</a>
+
+                {% if user.is_authenticated %}
+                    {% if user.is_family %}
+                        <a href="{% url 'family_dashboard' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Family dashboard</a>
+                    {% elif user.is_caregiver %}
+                        <a href="{% url 'caregiver_dashboard' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Caregiver dashboard</a>
+                    {% endif %}
+
+                    <a href="{% url 'inbox' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Messages</a>
+                    <a href="{% url 'account_logout' %}" class="text-sm font-medium text-red-500 hover:text-red-600 transition">Log out</a>
+                {% else %}
+                    <a href="{% url 'account_login' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Log in</a>
+                    <a href="{% url 'family_signup' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Join as family</a>
+                    <a href="{% url 'caregiver_signup' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Join as caregiver</a>
+                {% endif %}
             </nav>
         </div>
 
         <nav
             id="mobile-menu"
-            class="mt-3 flex flex-col space-y-1 md:hidden hidden bg-white border border-gray-200 rounded-lg p-2"
+            class="mt-3 flex flex-col space-y-1 md:hidden hidden bg-white border border-gray-200 rounded-lg p-2 shadow-sm"
         >
-            {% include 'layout/nav_links.html' with
-                link_class='block w-full text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-soft-teal transition'
-                danger_class='block w-full text-left px-3 py-2 rounded-md text-red-500 hover:bg-red-50 hover:text-red-600 transition'
-            %}
+            <a href="{% url 'caregiver_list' %}" class="block w-full text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-soft-teal transition">Browse caregivers</a>
+
+            {% if user.is_authenticated %}
+                {% if user.is_family %}
+                    <a href="{% url 'family_dashboard' %}" class="block w-full text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-soft-teal transition">Family dashboard</a>
+                {% elif user.is_caregiver %}
+                    <a href="{% url 'caregiver_dashboard' %}" class="block w-full text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-soft-teal transition">Caregiver dashboard</a>
+                {% endif %}
+
+                <a href="{% url 'inbox' %}" class="block w-full text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-soft-teal transition">Messages</a>
+                <a href="{% url 'account_logout' %}" class="block w-full text-left px-3 py-2 rounded-md text-red-500 hover:bg-red-50 hover:text-red-600 transition">Log out</a>
+            {% else %}
+                <a href="{% url 'account_login' %}" class="block w-full text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-soft-teal transition">Log in</a>
+                <a href="{% url 'family_signup' %}" class="block w-full text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-soft-teal transition">Join as family</a>
+                <a href="{% url 'caregiver_signup' %}" class="block w-full text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-soft-teal transition">Join as caregiver</a>
+            {% endif %}
         </nav>
     </div>
 </header>
@@ -119,15 +143,29 @@
     var menu = document.getElementById('mobile-menu');
     if (!toggle || !menu) return;
 
+    function closeMenu() {
+        menu.classList.add('hidden');
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+
     toggle.addEventListener('click', function() {
         var isHidden = menu.classList.contains('hidden');
         if (isHidden) {
             menu.classList.remove('hidden');
             toggle.setAttribute('aria-expanded', 'true');
         } else {
-            menu.classList.add('hidden');
-            toggle.setAttribute('aria-expanded', 'false');
+            closeMenu();
         }
+    });
+
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 768) {
+            closeMenu();
+        }
+    });
+
+    menu.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', closeMenu);
     });
 })();
 </script>
