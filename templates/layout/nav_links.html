@@ -1,0 +1,23 @@
+{% url 'caregiver_list' as caregiver_list_url %}
+{% url 'family_dashboard' as family_dashboard_url %}
+{% url 'caregiver_dashboard' as caregiver_dashboard_url %}
+{% url 'inbox' as inbox_url %}
+{% url 'account_login' as login_url %}
+{% url 'account_logout' as logout_url %}
+
+<a href="{{ caregiver_list_url }}" class="{{ link_class }}">Browse caregivers</a>
+
+{% if user.is_authenticated %}
+    {% if user.is_family %}
+        <a href="{{ family_dashboard_url }}" class="{{ link_class }}">Family dashboard</a>
+    {% elif user.is_caregiver %}
+        <a href="{{ caregiver_dashboard_url }}" class="{{ link_class }}">Caregiver dashboard</a>
+    {% endif %}
+
+    <a href="{{ inbox_url }}" class="{{ link_class }}">Messages</a>
+    <a href="{{ logout_url }}" class="{{ danger_class }}">Log out</a>
+{% else %}
+    <a href="{{ login_url }}" class="{{ link_class }}">Log in</a>
+    <a href="{% url 'family_signup' %}" class="{{ link_class }}">Join as family</a>
+    <a href="{% url 'caregiver_signup' %}" class="{{ link_class }}">Join as caregiver</a>
+{% endif %}

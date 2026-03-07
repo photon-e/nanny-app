@@ -50,22 +50,10 @@
             </button>
 
             <nav class="hidden md:flex items-center justify-end gap-x-4 gap-y-2 flex-wrap">
-                <a href="{% url 'caregiver_list' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Browse caregivers</a>
-
-                {% if user.is_authenticated %}
-                    {% if user.is_family %}
-                        <a href="{% url 'family_dashboard' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Family dashboard</a>
-                    {% elif user.is_caregiver %}
-                        <a href="{% url 'caregiver_dashboard' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Caregiver dashboard</a>
-                    {% endif %}
-
-                    <a href="{% url 'inbox' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Messages</a>
-                    <a href="{% url 'account_logout' %}" class="text-sm font-medium text-red-500 hover:text-red-600 transition">Log out</a>
-                {% else %}
-                    <a href="{% url 'account_login' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Log in</a>
-                    <a href="{% url 'family_signup' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Join as family</a>
-                    <a href="{% url 'caregiver_signup' %}" class="text-sm font-medium text-gray-700 hover:text-soft-teal transition">Join as caregiver</a>
-                {% endif %}
+                {% include 'layout/nav_links.html' with
+                    link_class='text-sm font-medium text-gray-700 hover:text-soft-teal transition'
+                    danger_class='text-sm font-medium text-red-500 hover:text-red-600 transition'
+                %}
             </nav>
         </div>
 
