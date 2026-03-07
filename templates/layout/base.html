@@ -49,7 +49,7 @@
                 </svg>
             </button>
 
-            <nav class="hidden md:flex items-center space-x-4">
+            <nav class="hidden md:flex items-center justify-end gap-x-4 gap-y-2 flex-wrap">
                 {% include 'layout/nav_links.html' with
                     link_class='text-sm font-medium text-gray-700 hover:text-soft-teal transition'
                     danger_class='text-sm font-medium text-red-500 hover:text-red-600 transition'
@@ -59,7 +59,7 @@
 
         <nav
             id="mobile-menu"
-            class="mt-3 flex flex-col space-y-1 md:hidden hidden bg-white border border-gray-200 rounded-lg p-2"
+            class="mt-3 flex flex-col space-y-1 md:hidden hidden bg-white border border-gray-200 rounded-lg p-2 shadow-sm"
         >
             {% include 'layout/nav_links.html' with
                 link_class='block w-full text-left px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 hover:text-soft-teal transition'
@@ -119,15 +119,29 @@
     var menu = document.getElementById('mobile-menu');
     if (!toggle || !menu) return;
 
+    function closeMenu() {
+        menu.classList.add('hidden');
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+
     toggle.addEventListener('click', function() {
         var isHidden = menu.classList.contains('hidden');
         if (isHidden) {
             menu.classList.remove('hidden');
             toggle.setAttribute('aria-expanded', 'true');
         } else {
-            menu.classList.add('hidden');
-            toggle.setAttribute('aria-expanded', 'false');
+            closeMenu();
         }
+    });
+
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 768) {
+            closeMenu();
+        }
+    });
+
+    menu.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', closeMenu);
     });
 })();
 </script>
