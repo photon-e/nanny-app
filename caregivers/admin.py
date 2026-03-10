@@ -43,7 +43,7 @@ class CaregiverProfileAdmin(admin.ModelAdmin):
         
         # Check if all requirements met
         if obj.registration_level >= 3 and obj.guarantors.count() >= 2:
-            url = reverse('admin:approve_caregiver', args=[obj.pk])
+            url = reverse('admin_approve_caregiver', args=[obj.pk])
             return format_html('<a href="{}" class="button">Approve</a>', url)
         return "Requirements not met"
     approve_button.short_description = "Actions"
