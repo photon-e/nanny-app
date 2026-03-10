@@ -10,31 +10,9 @@ from .models import Message
 
 @login_required
 def inbox(request):
-    all_messages = (
-        Message.objects.filter(Q(sender=request.user) | Q(receiver=request.user))
-        .select_related("sender", "receiver")
-        .order_by("-timestamp")
-    )
-
-    conversations = []
-    seen_user_ids = set()
-    for msg in all_messages:
-        other_user = msg.receiver if msg.sender_id == request.user.id else msg.sender
-        if other_user.id in seen_user_ids:
-            continue
-        seen_user_ids.add(other_user.id)
-        unread_count = Message.objects.filter(
-            sender=other_user, receiver=request.user, read=False
-        ).count()
-        conversations.append(
-            {
-                "other_user": other_user,
-                "last_message": msg,
-                "unread_count": unread_count,
-            }
-        )
-
-    return render(request, "messaging/inbox.html", {"conversations": conversations})
+    # Show messages for the logged-in user
+    inbox_messages = request.user.received_messages.order_by('-timestamp')
+    return render(request, 'messaging/inbox.html', {'inbox_messages': inbox_messages})
 
 
 @login_required

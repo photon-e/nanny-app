@@ -16,10 +16,10 @@ from .forms import (
 )
 
 
-from django.db.models import Q, Case, When, Value, IntegerField
+from django.db.models import Q
 from decimal import Decimal, InvalidOperation
 
-from families.models import Booking, FamilyProfile
+from families.models import Booking
 from core.models import MonitoredMessage
 
 
@@ -42,34 +42,14 @@ def _parse_decimal(value):
         return None
 
 
-
-
-def _annotate_location_proximity(caregivers, family_location):
-    family_location = (family_location or "").strip()
-    if not family_location:
-        return caregivers.annotate(location_rank=Value(3, output_field=IntegerField())).order_by("location_rank", "-verified", "-is_available", "user__first_name", "user__last_name")
-
-    return caregivers.annotate(
-        location_rank=Case(
-            When(location__iexact=family_location, then=Value(0)),
-            When(location__icontains=family_location, then=Value(1)),
-            default=Value(2),
-            output_field=IntegerField(),
-        )
-    ).order_by("location_rank", "-verified", "-is_available", "user__first_name", "user__last_name")
-
+from families.models import Booking
+from core.models import MonitoredMessage
 
 def caregiver_list(request):
     q = (request.GET.get("q") or "").strip()
     caregivers = CaregiverProfile.objects.select_related("user")
 
-    family_location = ""
-    if request.user.is_authenticated and getattr(request.user, "is_family", False):
-        family_profile = FamilyProfile.objects.filter(user=request.user).only("location").first()
-        family_location = family_profile.location if family_profile else ""
-    else:
-        caregivers = caregivers.filter(is_available=True)
-
+    q = (request.GET.get("q") or "").strip()
     location = (request.GET.get("location") or "").strip()
     min_exp = _parse_positive_int(request.GET.get("min_exp"))
     max_rate = _parse_decimal(request.GET.get("max_rate"))
@@ -90,11 +70,6 @@ def caregiver_list(request):
     if max_rate is not None:
         caregivers = caregivers.filter(hourly_rate__lte=max_rate)
 
-    if request.user.is_authenticated and getattr(request.user, "is_family", False):
-        caregivers = _annotate_location_proximity(caregivers, family_location)
-    else:
-        caregivers = caregivers.order_by("-verified", "user__first_name", "user__last_name")
-
     return render(
         request,
         "caregivers/profile_list.html",
@@ -104,8 +79,6 @@ def caregiver_list(request):
             "search_location": location,
             "search_min_exp": "" if min_exp is None else str(min_exp),
             "search_max_rate": "" if max_rate is None else str(max_rate.quantize(Decimal("1")) if max_rate == max_rate.to_integral_value() else max_rate),
-            "family_location": family_location,
-            "show_all_for_family": request.user.is_authenticated and getattr(request.user, "is_family", False),
         },
     )
 
