@@ -130,18 +130,16 @@
         {% if recent_bookings %}
           <ul class="divide-y text-sm">
             {% for b in recent_bookings %}
-              <li class="py-2 flex justify-between items-center">
+              <li class="py-2 flex justify-between items-center gap-4">
                 <div>
-                  <p class="font-medium">
-                    {{ b.caregiver.user.get_full_name|default:b.caregiver.user.username }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    {{ b.created_at|date:"M d, Y" }} — {{ b.get_status_display }}
-                  </p>
+                  <p class="font-medium">{{ b.caregiver.user.get_full_name|default:b.caregiver.user.username }}</p>
+                  <p class="text-xs text-gray-500">{{ b.created_at|date:"M d, Y" }} — {{ b.get_status_display }}</p>
+                  {% if b.service_start %}<p class="text-xs text-gray-500">Service: {{ b.service_start|date:"M d, Y H:i" }}</p>{% endif %}
                 </div>
                 <div class="text-right">
                   <p class="font-semibold">₦{{ b.amount }}</p>
                   <p class="text-xs text-gray-500">{{ b.get_payment_provider_display }}</p>
+                  <a href="{% url 'active_booking' b.id %}" class="text-soft-teal text-xs font-medium">Open Workspace →</a>
                 </div>
               </li>
             {% endfor %}

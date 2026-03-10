@@ -3,18 +3,57 @@
 {% block title %}Inbox{% endblock %}
 
 {% block content %}
-<h1>Inbox</h1>
+<section class="max-w-6xl mx-auto space-y-5">
+  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-soft-teal">Inbox</h1>
+      <p class="text-gray-600 mt-1">Manage your conversations in one place.</p>
+    </div>
 
-{% if messages %}
-    {% for msg in messages %}
-        <div class="card">
-            <p><strong>From:</strong> {{ msg.sender.get_full_name|default:msg.sender.username }}</p>
-            <p>{{ msg.content }}</p>
-            <p><small>{{ msg.timestamp }}</small></p>
-            <a href="{% url 'send_message' msg.sender.id %}">Reply</a>
-        </div>
-    {% endfor %}
-{% else %}
-    <p>No messages yet.</p>
-{% endif %}
+    <form method="get" class="flex flex-wrap items-center gap-2">
+      <input type="text" name="q" value="{{ search_q }}" placeholder="Search conversations" class="px-4 py-2 rounded-lg border border-gray-300 min-w-[230px]">
+      <input type="hidden" name="tab" value="{{ active_tab }}">
+      <button class="bg-soft-teal hover:bg-teal-dark text-white px-4 py-2 rounded-lg font-semibold transition">Search</button>
+      {% if search_q %}
+        <a href="{% url 'inbox' %}?tab={{ active_tab }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Clear</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-2">
+    <a href="{% url 'inbox' %}{% if search_q %}?q={{ search_q|urlencode }}{% endif %}" class="px-3 py-1.5 rounded-full text-sm font-medium {% if active_tab == 'all' %}bg-navy text-white{% else %}bg-white border border-gray-300 text-gray-700{% endif %}">All</a>
+    <a href="{% url 'inbox' %}?tab=unread{% if search_q %}&q={{ search_q|urlencode }}{% endif %}" class="px-3 py-1.5 rounded-full text-sm font-medium {% if active_tab == 'unread' %}bg-navy text-white{% else %}bg-white border border-gray-300 text-gray-700{% endif %}">Unread</a>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm divide-y">
+    {% if conversations %}
+      {% for convo in conversations %}
+        <a href="{% url 'send_message' convo.other_user.id %}" class="block px-5 py-4 hover:bg-gray-50 transition">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-full bg-teal-light/30 text-soft-teal font-bold flex items-center justify-center flex-shrink-0">
+              {{ convo.other_user.username|first|upper }}
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between gap-3">
+                <p class="font-semibold text-gray-900 truncate">{{ convo.other_user.get_full_name|default:convo.other_user.username }}</p>
+                <p class="text-xs text-gray-500 whitespace-nowrap">{{ convo.last_message.timestamp|date:"M d, H:i" }}</p>
+              </div>
+              <p class="mt-1 text-sm {% if convo.last_message.receiver_id == user.id and not convo.last_message.read %}text-gray-900 font-semibold{% else %}text-gray-600{% endif %} truncate">
+                {% if convo.last_message.sender_id == user.id %}<span class="text-gray-500">You:</span>{% endif %} {{ convo.last_message.content }}
+              </p>
+            </div>
+            {% if convo.unread_count %}
+              <span class="inline-flex items-center justify-center min-w-[1.35rem] h-5 px-1 rounded-full bg-terracotta text-white text-[10px] font-bold">{{ convo.unread_count }}</span>
+            {% endif %}
+          </div>
+        </a>
+      {% endfor %}
+    {% else %}
+      <div class="p-12 text-center">
+        <p class="text-lg font-semibold text-gray-700">No conversations found</p>
+        <p class="text-sm text-gray-500 mt-1">Try a different search or start messaging from profiles.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
 {% endblock %}

@@ -2,10 +2,18 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db.models import Count, Q, Case, When, Value, BooleanField
+from django.utils import timezone
+from datetime import timedelta
+from decimal import Decimal
 
 from .forms import FamilyProfileForm
 from .models import AuthorizedPickup, Booking, FamilyProfile, IncidentReport
 from caregivers.models import CaregiverProfile
+
+
+def _get_or_create_family_profile(user):
+    profile, _ = FamilyProfile.objects.get_or_create(user=user, defaults={"location": ""})
+    return profile
 
 
 @login_required
@@ -13,9 +21,7 @@ def family_dashboard(request):
     if not request.user.is_family:
         return redirect("/")
 
-    profile = getattr(request.user, "familyprofile", None)
-    if profile is None:
-        profile = FamilyProfile.objects.create(user=request.user)
+    profile = _get_or_create_family_profile(request.user)
 
     if request.method == "POST":
         form = FamilyProfileForm(request.POST, instance=profile)
@@ -49,9 +55,7 @@ def caregiver_search(request):
     if not request.user.is_family:
         return redirect("/")
 
-    profile = getattr(request.user, "familyprofile", None)
-    if profile is None:
-        profile = FamilyProfile.objects.create(user=request.user)
+    profile = _get_or_create_family_profile(request.user)
 
     q = request.GET.get("q")
     location = request.GET.get("location")
@@ -111,9 +115,7 @@ def create_booking(request, caregiver_id):
     if not request.user.is_family:
         return redirect("/")
 
-    profile = getattr(request.user, "familyprofile", None)
-    if profile is None:
-        profile = FamilyProfile.objects.create(user=request.user)
+    profile = _get_or_create_family_profile(request.user)
 
     caregiver = CaregiverProfile.objects.select_related("user").get(id=caregiver_id)
 
@@ -121,17 +123,22 @@ def create_booking(request, caregiver_id):
     amount = 10000  # e.g. 10000 NGN placeholder
     provider = profile.default_payment_provider or "paystack"
 
-    from decimal import Decimal
-    
     # Calculate commission (15%)
     commission_rate = Decimal('0.15')
     agent_commission = amount * commission_rate
     caregiver_payout = amount - agent_commission
     
+    service_start = timezone.now() + timedelta(days=1)
+    service_end = service_start + timedelta(hours=8)
+
     booking = Booking.objects.create(
         family=profile,
         caregiver=caregiver,
         amount=amount,
+        service_start=service_start,
+        service_end=service_end,
+        service_location_lat=Decimal("6.524400"),
+        service_location_lng=Decimal("3.379200"),
         payment_provider=provider,
         status="pending",
         agent_commission=agent_commission,
@@ -149,7 +156,7 @@ def create_booking(request, caregiver_id):
 
     messages.info(
         request,
-        "Booking created. Service agreement has been emailed. Integrate payment provider redirect here (Paystack/Flutterwave/etc.).",
+        "Booking created. Open the active booking workspace to track status, check-ins, and monitored chat.",
     )
     return redirect("family_dashboard")
 
@@ -159,9 +166,7 @@ def add_authorized_pickup(request):
     if not request.user.is_family:
         return redirect("/")
 
-    profile = getattr(request.user, "familyprofile", None)
-    if profile is None:
-        profile = FamilyProfile.objects.create(user=request.user)
+    profile = _get_or_create_family_profile(request.user)
 
     if request.method == "POST":
         full_name = request.POST.get("full_name")
@@ -188,9 +193,7 @@ def report_incident(request):
     if not request.user.is_family:
         return redirect("/")
 
-    profile = getattr(request.user, "familyprofile", None)
-    if profile is None:
-        profile = FamilyProfile.objects.create(user=request.user)
+    profile = _get_or_create_family_profile(request.user)
 
     if request.method == "POST":
         incident_type = request.POST.get("incident_type")

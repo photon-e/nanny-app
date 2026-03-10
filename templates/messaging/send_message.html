@@ -1,15 +1,51 @@
 {% extends "layout/base.html" %}
 
-{% block title %}Send Message{% endblock %}
+{% block title %}Conversation{% endblock %}
 
 {% block content %}
-<h1>Send Message to {{ receiver.get_full_name|default:receiver.username }}</h1>
+<section class="max-w-5xl mx-auto">
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="p-5 border-b bg-gray-50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-xl md:text-2xl font-bold text-soft-teal">Conversation with {{ receiver.get_full_name|default:receiver.username }}</h1>
+        <p class="text-sm text-gray-600">{{ thread_total }} message{{ thread_total|pluralize }}{% if thread_latest %} • Last activity {{ thread_latest|date:"M d, Y H:i" }}{% endif %}</p>
+      </div>
+      <a href="{% url 'inbox' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-white transition">Back to Inbox</a>
+    </div>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Send</button>
-</form>
+    <div class="p-5 h-[26rem] overflow-y-auto bg-off-white space-y-3" id="thread-container">
+      {% for msg in thread_messages %}
+        <div class="flex {% if msg.sender_id == user.id %}justify-end{% else %}justify-start{% endif %}">
+          <div class="max-w-[82%] px-4 py-3 rounded-2xl shadow-sm {% if msg.sender_id == user.id %}bg-soft-teal text-white rounded-br-md{% else %}bg-white text-gray-800 rounded-bl-md border border-gray-200{% endif %}">
+            <p class="text-sm leading-relaxed whitespace-pre-line">{{ msg.content }}</p>
+            <p class="text-[11px] mt-1 {% if msg.sender_id == user.id %}text-white/80{% else %}text-gray-500{% endif %}">{{ msg.timestamp|date:"M d, Y H:i" }}</p>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-sm text-gray-500 text-center mt-12">No messages in this conversation yet.</p>
+      {% endfor %}
+    </div>
 
-<p><a href="{% url 'inbox' %}">Back to Inbox</a></p>
+    <form method="post" class="p-5 border-t bg-white space-y-3">
+      {% csrf_token %}
+      <label for="id_content" class="text-sm font-medium text-gray-700">Type your message</label>
+      {{ form.content }}
+      {% if form.content.errors %}
+        <p class="text-sm text-red-600">{{ form.content.errors.0 }}</p>
+      {% endif %}
+      <div class="flex justify-end">
+        <button type="submit" class="bg-soft-teal hover:bg-teal-dark text-white px-6 py-2 rounded-lg font-semibold transition shadow">Send</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script>
+(function() {
+  const container = document.getElementById('thread-container');
+  if (container) {
+    container.scrollTop = container.scrollHeight;
+  }
+})();
+</script>
 {% endblock %}
