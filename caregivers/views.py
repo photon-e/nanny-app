@@ -46,8 +46,8 @@ from families.models import Booking
 from core.models import MonitoredMessage
 
 def caregiver_list(request):
-    # Only show available caregivers
-    caregivers = CaregiverProfile.objects.select_related("user").filter(is_available=True)
+    q = (request.GET.get("q") or "").strip()
+    caregivers = CaregiverProfile.objects.select_related("user")
 
     q = (request.GET.get("q") or "").strip()
     location = (request.GET.get("location") or "").strip()
