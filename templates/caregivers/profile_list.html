@@ -2,43 +2,40 @@
 {% block title %}Browse Caregivers{% endblock %}
 
 {% block content %}
-<section class="space-y-8">
-  <div class="rounded-2xl bg-gradient-to-r from-navy to-soft-teal text-white p-8 md:p-10 shadow-lg">
-    <p class="text-sm uppercase tracking-wide text-teal-light">Kinshields Directory</p>
-    <h1 class="text-3xl md:text-4xl font-bold mt-2">Browse Trusted Caregivers</h1>
-    {% if show_all_for_family %}
-      <p class="mt-3 text-white/90 max-w-3xl">
-        You are seeing all caregivers in the system, sorted by closeness to your location
-        {% if family_location %}<strong>({{ family_location }})</strong>{% endif %}.
-      </p>
-    {% else %}
-      <p class="mt-3 text-white/90 max-w-3xl">
-        Discover available caregivers by name, location, experience, and budget.
-      </p>
-    {% endif %}
-
-    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4">
-        <p class="text-xs uppercase text-white/70">Results</p>
-        <p class="text-2xl font-semibold">{{ caregivers|length }}</p>
-      </div>
-      <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4">
-        <p class="text-xs uppercase text-white/70">Sort</p>
-        <p class="text-sm font-medium">{% if show_all_for_family %}Closest first{% else %}Best available{% endif %}</p>
-      </div>
-      <div class="bg-white/15 backdrop-blur-sm rounded-xl p-4">
-        <p class="text-xs uppercase text-white/70">Filters</p>
-        <p class="text-sm font-medium">Name • Location • Experience • Rate</p>
-      </div>
+<div class="min-h-screen bg-off-white py-8 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-soft-teal mb-2">Browse Caregivers</h1>
+      {% if show_all_for_family %}
+        <p class="text-gray-600">Showing all caregivers, sorted by closeness to your location{% if family_location %} ({{ family_location }}){% endif %}.</p>
+      {% else %}
+        <p class="text-gray-600">Find available caregivers using name, location, experience, and rate filters.</p>
+      {% endif %}
     </div>
-  </div>
 
-  <form method="get" class="bg-white p-5 md:p-6 rounded-2xl border border-gray-200 shadow-sm grid grid-cols-1 md:grid-cols-5 gap-4">
-    <input type="text" name="q" value="{{ search_q }}" placeholder="🔍 Name or keyword"
-      class="md:col-span-2 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-soft-teal focus:outline-none">
+<h1 class="text-3xl font-bold mb-6">Find the Perfect Caregiver</h1>
 
-    <input type="text" name="location" value="{{ search_location }}" placeholder="📍 Location"
-      class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-soft-teal focus:outline-none">
+<!-- SEARCH + FILTER BAR -->
+<form method="get"
+      class="bg-white p-6 rounded-xl shadow mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+
+  <!-- Search by name or bio -->
+  <input
+      type="text"
+      name="q"
+      value="{{ search_q }}"
+      placeholder="Search by name, skills or description"
+      class="border-gray-300 rounded-lg p-3 w-full"
+  >
+
+  <!-- Location -->
+  <input
+      type="text"
+      name="location"
+      value="{{ search_location }}"
+      placeholder="Location (e.g Lagos, Abuja)"
+      class="border-gray-300 rounded-lg p-3 w-full"
+  >
 
     <select name="min_exp" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-soft-teal focus:outline-none">
       <option value="">Min Experience</option>
@@ -46,20 +43,29 @@
       <option value="2" {% if search_min_exp == "2" %}selected{% endif %}>2+ years</option>
       <option value="3" {% if search_min_exp == "3" %}selected{% endif %}>3+ years</option>
       <option value="5" {% if search_min_exp == "5" %}selected{% endif %}>5+ years</option>
-    </select>
+  </select>
 
     <select name="max_rate" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-soft-teal focus:outline-none">
       <option value="">Max Hourly Rate</option>
       <option value="2000" {% if search_max_rate == "2000" %}selected{% endif %}>₦2000</option>
       <option value="3000" {% if search_max_rate == "3000" %}selected{% endif %}>₦3000</option>
       <option value="5000" {% if search_max_rate == "5000" %}selected{% endif %}>₦5000</option>
-    </select>
+  </select>
 
-    <div class="md:col-span-5 flex flex-wrap justify-end gap-3 pt-1">
-      <a href="{% url 'caregiver_list' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">Reset</a>
-      <button class="bg-soft-teal hover:bg-teal-dark text-white px-6 py-2 rounded-lg font-semibold transition shadow">Search</button>
-    </div>
-  </form>
+  <div class="md:col-span-4 flex justify-end gap-3">
+      <a href="/caregivers/"
+         class="px-4 py-2 border rounded-lg">
+         Reset
+      </a>
+
+      <button
+        class="bg-soft-teal text-white px-6 py-2 rounded-lg">
+        Search
+      </button>
+  </div>
+</form>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
     {% for caregiver in caregivers %}
@@ -83,34 +89,13 @@
             <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800 border">Basic</span>
           {% endif %}
         </div>
-
-        <dl class="grid grid-cols-2 gap-3 mb-4 text-sm">
-          <div class="bg-gray-50 rounded-lg p-3">
-            <dt class="text-gray-500">Experience</dt>
-            <dd class="font-semibold text-gray-800">{{ caregiver.experience_years }} yr{{ caregiver.experience_years|pluralize }}</dd>
-          </div>
-          <div class="bg-gray-50 rounded-lg p-3">
-            <dt class="text-gray-500">Rate</dt>
-            <dd class="font-semibold text-soft-teal">{% if caregiver.hourly_rate %}₦{{ caregiver.hourly_rate|floatformat:0 }}/hr{% else %}Not set{% endif %}</dd>
-          </div>
-        </dl>
-
-        {% if caregiver.bio %}
-          <p class="text-sm text-gray-600 line-clamp-3 mb-5">{{ caregiver.bio }}</p>
-        {% else %}
-          <p class="text-sm text-gray-400 mb-5">No bio added yet.</p>
-        {% endif %}
-
-        <a href="{% url 'caregiver_detail' caregiver.pk %}" class="mt-auto inline-flex items-center justify-center bg-off-white hover:bg-teal-light/20 text-soft-teal border border-soft-teal/20 px-4 py-2 rounded-lg font-semibold transition">
-          View Profile
-        </a>
-      </article>
-    {% empty %}
-      <div class="col-span-full bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
-        <p class="text-lg font-semibold text-gray-700 mb-2">No caregivers found</p>
-        <p class="text-sm text-gray-500">Try adjusting your filters to expand results.</p>
-      </div>
-    {% endfor %}
+      {% empty %}
+        <div class="col-span-full bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center">
+          <p class="text-gray-500 text-lg mb-2">No caregivers found</p>
+          <p class="text-gray-400 text-sm">Try adjusting your filters or search terms.</p>
+        </div>
+      {% endfor %}
+    </div>
   </div>
-</section>
+</div>
 {% endblock %}
