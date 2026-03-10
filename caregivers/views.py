@@ -18,6 +18,9 @@ from .forms import (
 
 from django.db.models import Q
 
+from families.models import Booking
+from core.models import MonitoredMessage
+
 def caregiver_list(request):
     # Only show available caregivers
     caregivers = CaregiverProfile.objects.select_related("user").filter(is_available=True)
@@ -88,11 +91,40 @@ def caregiver_dashboard(request):
     else:
         form = CaregiverProfileForm(instance=profile)
 
+    active_bookings = (
+        Booking.objects.select_related("family__user")
+        .filter(caregiver=profile)
+        .order_by("-created_at")
+    )
+    recent_bookings = active_bookings[:5]
+
+    assigned_families = []
+    seen_family_ids = set()
+    for booking in active_bookings:
+        family = booking.family
+        if family.id in seen_family_ids:
+            continue
+        seen_family_ids.add(family.id)
+        assigned_families.append(
+            {
+                "id": family.id,
+                "full_name": family.user.get_full_name() or family.user.username,
+                "location": family.location,
+            }
+        )
+
+    recent_messages = (
+        MonitoredMessage.objects.select_related("sender", "booking")
+        .filter(booking__caregiver=profile)
+        .order_by("-created_at")[:5]
+    )
+
     context = {
         'profile': profile,
         'form': form,
-        'assigned_families': [],  # placeholder
-        'messages': [],           # placeholder
+        'assigned_families': assigned_families,
+        'messages': recent_messages,
+        'recent_bookings': recent_bookings,
     }
 
     return render(request, "caregivers/dashboard.html", context)
