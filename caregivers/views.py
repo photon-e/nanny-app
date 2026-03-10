@@ -17,6 +17,30 @@ from .forms import (
 
 
 from django.db.models import Q
+from decimal import Decimal, InvalidOperation
+
+from families.models import Booking
+from core.models import MonitoredMessage
+
+
+def _parse_positive_int(value):
+    if value in (None, ""):
+        return None
+    try:
+        parsed = int(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed >= 0 else None
+
+
+def _parse_decimal(value):
+    if value in (None, ""):
+        return None
+    try:
+        return Decimal(str(value).strip())
+    except (InvalidOperation, TypeError):
+        return None
+
 
 from families.models import Booking
 from core.models import MonitoredMessage
@@ -25,10 +49,10 @@ def caregiver_list(request):
     # Only show available caregivers
     caregivers = CaregiverProfile.objects.select_related("user").filter(is_available=True)
 
-    q = request.GET.get("q")
-    location = request.GET.get("location")
-    min_exp = request.GET.get("min_exp")
-    max_rate = request.GET.get("max_rate")
+    q = (request.GET.get("q") or "").strip()
+    location = (request.GET.get("location") or "").strip()
+    min_exp = _parse_positive_int(request.GET.get("min_exp"))
+    max_rate = _parse_decimal(request.GET.get("max_rate"))
 
     if q:
         caregivers = caregivers.filter(
@@ -40,15 +64,23 @@ def caregiver_list(request):
     if location:
         caregivers = caregivers.filter(location__icontains=location)
 
-    if min_exp:
+    if min_exp is not None:
         caregivers = caregivers.filter(experience_years__gte=min_exp)
 
-    if max_rate:
+    if max_rate is not None:
         caregivers = caregivers.filter(hourly_rate__lte=max_rate)
 
-    return render(request, "caregivers/profile_list.html", {
-        "caregivers": caregivers
-    })
+    return render(
+        request,
+        "caregivers/profile_list.html",
+        {
+            "caregivers": caregivers,
+            "search_q": q,
+            "search_location": location,
+            "search_min_exp": "" if min_exp is None else str(min_exp),
+            "search_max_rate": "" if max_rate is None else str(max_rate.quantize(Decimal("1")) if max_rate == max_rate.to_integral_value() else max_rate),
+        },
+    )
 
 
 def caregiver_detail(request, pk):
