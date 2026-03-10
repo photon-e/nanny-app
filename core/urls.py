@@ -70,8 +70,9 @@ urlpatterns = [
     path('admin/acknowledge-panic/<int:alert_id>/', acknowledge_panic, name='admin_acknowledge_panic'),
     
     # Geofencing & Chat
-    path('booking/<int:booking_id>/checkin/', views.geofence_checkin, name='geofence_checkin'),
-    path('booking/<int:booking_id>/message/', views.send_message, name='send_message'),
+    path('booking/<int:booking_id>/', views.active_booking, name='active_booking'),
+    path('booking/<int:booking_id>/checkin/', views.booking_checkin, name='booking_checkin'),
+    path('booking/<int:booking_id>/message/', views.booking_send_message, name='booking_send_message'),
     path('booking/<int:booking_id>/agreement/', views.generate_booking_agreement, name='generate_agreement'),
     path('panic-alert/', views.trigger_panic_alert, name='panic_alert'),
 ]
