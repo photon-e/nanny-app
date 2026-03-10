@@ -11,14 +11,17 @@ from .models import AuthorizedPickup, Booking, FamilyProfile, IncidentReport
 from caregivers.models import CaregiverProfile
 
 
+def _get_or_create_family_profile(user):
+    profile, _ = FamilyProfile.objects.get_or_create(user=user, defaults={"location": ""})
+    return profile
+
+
 @login_required
 def family_dashboard(request):
     if not request.user.is_family:
         return redirect("/")
 
-    profile = getattr(request.user, "familyprofile", None)
-    if profile is None:
-        profile = FamilyProfile.objects.create(user=request.user)
+    profile = _get_or_create_family_profile(request.user)
 
     if request.method == "POST":
         form = FamilyProfileForm(request.POST, instance=profile)
@@ -52,9 +55,7 @@ def caregiver_search(request):
     if not request.user.is_family:
         return redirect("/")
 
-    profile = getattr(request.user, "familyprofile", None)
-    if profile is None:
-        profile = FamilyProfile.objects.create(user=request.user)
+    profile = _get_or_create_family_profile(request.user)
 
     q = request.GET.get("q")
     location = request.GET.get("location")
@@ -114,9 +115,7 @@ def create_booking(request, caregiver_id):
     if not request.user.is_family:
         return redirect("/")
 
-    profile = getattr(request.user, "familyprofile", None)
-    if profile is None:
-        profile = FamilyProfile.objects.create(user=request.user)
+    profile = _get_or_create_family_profile(request.user)
 
     caregiver = CaregiverProfile.objects.select_related("user").get(id=caregiver_id)
 
@@ -167,9 +166,7 @@ def add_authorized_pickup(request):
     if not request.user.is_family:
         return redirect("/")
 
-    profile = getattr(request.user, "familyprofile", None)
-    if profile is None:
-        profile = FamilyProfile.objects.create(user=request.user)
+    profile = _get_or_create_family_profile(request.user)
 
     if request.method == "POST":
         full_name = request.POST.get("full_name")
@@ -196,9 +193,7 @@ def report_incident(request):
     if not request.user.is_family:
         return redirect("/")
 
-    profile = getattr(request.user, "familyprofile", None)
-    if profile is None:
-        profile = FamilyProfile.objects.create(user=request.user)
+    profile = _get_or_create_family_profile(request.user)
 
     if request.method == "POST":
         incident_type = request.POST.get("incident_type")
