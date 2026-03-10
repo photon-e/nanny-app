@@ -65,9 +65,9 @@ urlpatterns = [
     path('', views.home, name='home'),
     
     # Admin actions
-    path('admin/approve-caregiver/<int:caregiver_id>/', approve_caregiver, name='admin:approve_caregiver'),
-    path('admin/resolve-dispute/<int:dispute_id>/', resolve_dispute, name='admin:resolve_dispute'),
-    path('admin/acknowledge-panic/<int:alert_id>/', acknowledge_panic, name='admin:acknowledge_panic'),
+    path('admin/approve-caregiver/<int:caregiver_id>/', approve_caregiver, name='admin_approve_caregiver'),
+    path('admin/resolve-dispute/<int:dispute_id>/', resolve_dispute, name='admin_resolve_dispute'),
+    path('admin/acknowledge-panic/<int:alert_id>/', acknowledge_panic, name='admin_acknowledge_panic'),
     
     # Geofencing & Chat
     path('booking/<int:booking_id>/checkin/', views.geofence_checkin, name='geofence_checkin'),

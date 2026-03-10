@@ -1,0 +1,24 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Sign out | Kinshields{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
+    <h1 class="text-2xl font-semibold text-gray-900 mb-2">Sign out</h1>
+    <p class="text-gray-600 mb-6">Are you sure you want to sign out of your Kinshields account?</p>
+
+    <form method="post" action="{% url 'account_logout' %}" class="space-y-4">
+        {% csrf_token %}
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+        {% endif %}
+
+        <button
+            type="submit"
+            class="w-full inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-white bg-red-600 hover:bg-red-700 transition"
+        >
+            Confirm sign out
+        </button>
+    </form>
+</div>
+{% endblock %}

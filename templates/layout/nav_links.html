@@ -15,7 +15,10 @@
     {% endif %}
 
     <a href="{{ inbox_url }}" class="{{ link_class }}">Messages</a>
-    <a href="{{ logout_url }}" class="{{ danger_class }}">Log out</a>
+    <form method="post" action="{{ logout_url }}" class="inline">
+        {% csrf_token %}
+        <button type="submit" class="{{ danger_class }} bg-transparent border-0 p-0 cursor-pointer">Log out</button>
+    </form>
 {% else %}
     <a href="{{ login_url }}" class="{{ link_class }}">Log in</a>
     <a href="{% url 'family_signup' %}" class="{{ link_class }}">Join as family</a>

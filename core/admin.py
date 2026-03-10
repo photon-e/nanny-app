@@ -24,7 +24,7 @@ class DisputeAdmin(admin.ModelAdmin):
         """Quick action buttons."""
         buttons = []
         if obj.status != 'resolved':
-            resolve_url = reverse('admin:resolve_dispute', args=[obj.pk])
+            resolve_url = reverse('admin_resolve_dispute', args=[obj.pk])
             buttons.append(f'<a href="{resolve_url}" class="button">Resolve</a>')
         return format_html(" ".join(buttons))
     actions.short_description = "Actions"
@@ -83,7 +83,7 @@ class PanicAlertAdmin(admin.ModelAdmin):
         """Acknowledge panic alert."""
         if obj.acknowledged:
             return format_html('<span style="color: green;">✓ Acknowledged</span>')
-        url = reverse('admin:acknowledge_panic', args=[obj.pk])
+        url = reverse('admin_acknowledge_panic', args=[obj.pk])
         return format_html('<a href="{}" class="button">Acknowledge</a>', url)
     acknowledge_button.short_description = "Actions"
 
