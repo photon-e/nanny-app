@@ -7,8 +7,8 @@ from accounts.models import User
 @login_required
 def inbox(request):
     # Show messages for the logged-in user
-    messages = request.user.received_messages.order_by('-timestamp')
-    return render(request, 'messaging/inbox.html', {'messages': messages})
+    inbox_messages = request.user.received_messages.order_by('-timestamp')
+    return render(request, 'messaging/inbox.html', {'inbox_messages': inbox_messages})
 
 
 @login_required
