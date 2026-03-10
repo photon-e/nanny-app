@@ -14,7 +14,7 @@
         <a href="{{ caregiver_dashboard_url }}" class="{{ link_class }}">Caregiver dashboard</a>
     {% endif %}
 
-    <a href="{{ inbox_url }}" class="{{ link_class }}">Messages</a>
+    <a href="{{ inbox_url }}" class="{{ link_class }}">Messages{% if unread_messages_count %} <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-terracotta text-white text-[10px] font-bold align-middle">{{ unread_messages_count }}</span>{% endif %}</a>
     <form method="post" action="{{ logout_url }}" class="inline">
         {% csrf_token %}
         <button type="submit" class="{{ danger_class }} bg-transparent border-0 p-0 cursor-pointer">Log out</button>

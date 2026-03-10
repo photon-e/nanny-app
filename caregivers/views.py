@@ -16,16 +16,63 @@ from .forms import (
 )
 
 
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, IntegerField
+from decimal import Decimal, InvalidOperation
+
+from families.models import Booking, FamilyProfile
+from core.models import MonitoredMessage
+
+
+def _parse_positive_int(value):
+    if value in (None, ""):
+        return None
+    try:
+        parsed = int(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed >= 0 else None
+
+
+def _parse_decimal(value):
+    if value in (None, ""):
+        return None
+    try:
+        return Decimal(str(value).strip())
+    except (InvalidOperation, TypeError):
+        return None
+
+
+
+
+def _annotate_location_proximity(caregivers, family_location):
+    family_location = (family_location or "").strip()
+    if not family_location:
+        return caregivers.annotate(location_rank=Value(3, output_field=IntegerField())).order_by("location_rank", "-verified", "-is_available", "user__first_name", "user__last_name")
+
+    return caregivers.annotate(
+        location_rank=Case(
+            When(location__iexact=family_location, then=Value(0)),
+            When(location__icontains=family_location, then=Value(1)),
+            default=Value(2),
+            output_field=IntegerField(),
+        )
+    ).order_by("location_rank", "-verified", "-is_available", "user__first_name", "user__last_name")
+
 
 def caregiver_list(request):
-    # Only show available caregivers
-    caregivers = CaregiverProfile.objects.select_related("user").filter(is_available=True)
+    q = (request.GET.get("q") or "").strip()
+    caregivers = CaregiverProfile.objects.select_related("user")
 
-    q = request.GET.get("q")
-    location = request.GET.get("location")
-    min_exp = request.GET.get("min_exp")
-    max_rate = request.GET.get("max_rate")
+    family_location = ""
+    if request.user.is_authenticated and getattr(request.user, "is_family", False):
+        family_profile = FamilyProfile.objects.filter(user=request.user).only("location").first()
+        family_location = family_profile.location if family_profile else ""
+    else:
+        caregivers = caregivers.filter(is_available=True)
+
+    location = (request.GET.get("location") or "").strip()
+    min_exp = _parse_positive_int(request.GET.get("min_exp"))
+    max_rate = _parse_decimal(request.GET.get("max_rate"))
 
     if q:
         caregivers = caregivers.filter(
@@ -37,15 +84,30 @@ def caregiver_list(request):
     if location:
         caregivers = caregivers.filter(location__icontains=location)
 
-    if min_exp:
+    if min_exp is not None:
         caregivers = caregivers.filter(experience_years__gte=min_exp)
 
-    if max_rate:
+    if max_rate is not None:
         caregivers = caregivers.filter(hourly_rate__lte=max_rate)
 
-    return render(request, "caregivers/profile_list.html", {
-        "caregivers": caregivers
-    })
+    if request.user.is_authenticated and getattr(request.user, "is_family", False):
+        caregivers = _annotate_location_proximity(caregivers, family_location)
+    else:
+        caregivers = caregivers.order_by("-verified", "user__first_name", "user__last_name")
+
+    return render(
+        request,
+        "caregivers/profile_list.html",
+        {
+            "caregivers": caregivers,
+            "search_q": q,
+            "search_location": location,
+            "search_min_exp": "" if min_exp is None else str(min_exp),
+            "search_max_rate": "" if max_rate is None else str(max_rate.quantize(Decimal("1")) if max_rate == max_rate.to_integral_value() else max_rate),
+            "family_location": family_location,
+            "show_all_for_family": request.user.is_authenticated and getattr(request.user, "is_family", False),
+        },
+    )
 
 
 def caregiver_detail(request, pk):
@@ -88,11 +150,40 @@ def caregiver_dashboard(request):
     else:
         form = CaregiverProfileForm(instance=profile)
 
+    active_bookings = (
+        Booking.objects.select_related("family__user")
+        .filter(caregiver=profile)
+        .order_by("-created_at")
+    )
+    recent_bookings = active_bookings[:5]
+
+    assigned_families = []
+    seen_family_ids = set()
+    for booking in active_bookings:
+        family = booking.family
+        if family.id in seen_family_ids:
+            continue
+        seen_family_ids.add(family.id)
+        assigned_families.append(
+            {
+                "id": family.id,
+                "full_name": family.user.get_full_name() or family.user.username,
+                "location": family.location,
+            }
+        )
+
+    recent_messages = (
+        MonitoredMessage.objects.select_related("sender", "booking")
+        .filter(booking__caregiver=profile)
+        .order_by("-created_at")[:5]
+    )
+
     context = {
         'profile': profile,
         'form': form,
-        'assigned_families': [],  # placeholder
-        'messages': [],           # placeholder
+        'assigned_families': assigned_families,
+        'messages': recent_messages,
+        'recent_bookings': recent_bookings,
     }
 
     return render(request, "caregivers/dashboard.html", context)

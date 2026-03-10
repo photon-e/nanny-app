@@ -1,0 +1,79 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Active Booking{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-off-white py-8 px-4">
+  <div class="max-w-5xl mx-auto space-y-6">
+    <div class="bg-white rounded-xl shadow p-6 border">
+      <h1 class="text-2xl font-bold text-gray-800">Active Booking #{{ booking.id }}</h1>
+      <p class="text-gray-600 mt-1">{{ booking.family.user.get_full_name|default:booking.family.user.username }} ↔ {{ booking.caregiver.user.get_full_name|default:booking.caregiver.user.username }}</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-sm">
+        <p><span class="font-semibold">Status:</span> {{ booking.get_status_display }}</p>
+        <p><span class="font-semibold">Amount:</span> ₦{{ booking.amount }}</p>
+        <p><span class="font-semibold">Provider:</span> {{ booking.get_payment_provider_display }}</p>
+        <p><span class="font-semibold">Start:</span> {{ booking.service_start|date:"M d, Y H:i"|default:"Not scheduled" }}</p>
+        <p><span class="font-semibold">End:</span> {{ booking.service_end|date:"M d, Y H:i"|default:"Not scheduled" }}</p>
+        <p><span class="font-semibold">Location:</span> {% if booking.service_location_lat and booking.service_location_lng %}{{ booking.service_location_lat }}, {{ booking.service_location_lng }}{% else %}Not set{% endif %}</p>
+      </div>
+      <div class="mt-4"><a href="{% url 'generate_agreement' booking.id %}" class="text-soft-teal text-sm font-medium">Regenerate Service Agreement →</a></div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6 border">
+      <h2 class="text-xl font-bold mb-4">Booking Status Timeline</h2>
+      <ul class="space-y-3">
+        {% for step in timeline_steps %}
+          <li class="flex items-start gap-3">
+            <span class="mt-0.5">{% if step.done %}✅{% else %}⚪{% endif %}</span>
+            <div>
+              <p class="font-medium">{{ step.label }}</p>
+              <p class="text-sm text-gray-500">{{ step.detail }}</p>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section class="bg-white rounded-xl shadow p-6 border">
+        <h2 class="text-xl font-bold mb-3">Geofence Check-in</h2>
+        {% if latest_checkin %}
+          <p class="text-sm text-gray-600 mb-3">Last check-in: {{ latest_checkin.checkin_time|date:"M d, Y H:i" }} {% if latest_checkin.verified %}<span class="text-green-600">(Verified)</span>{% else %}<span class="text-yellow-600">(Pending)</span>{% endif %}</p>
+        {% endif %}
+
+        {% if can_checkin %}
+          <form method="post" action="{% url 'booking_checkin' booking.id %}" class="space-y-3">
+            {% csrf_token %}
+            <input type="text" name="lat" placeholder="Actual latitude" class="w-full border rounded px-3 py-2 text-sm" required>
+            <input type="text" name="lng" placeholder="Actual longitude" class="w-full border rounded px-3 py-2 text-sm" required>
+            <button class="bg-soft-teal hover:bg-teal-dark text-white px-4 py-2 rounded-lg text-sm">Submit Check-in</button>
+          </form>
+        {% else %}
+          <p class="text-gray-500 text-sm">Only the assigned caregiver can submit check-ins.</p>
+        {% endif %}
+      </section>
+
+      <section class="bg-white rounded-xl shadow p-6 border">
+        <h2 class="text-xl font-bold mb-3">Monitored Booking Chat</h2>
+        <form method="post" action="{% url 'booking_send_message' booking.id %}" class="space-y-3 mb-4">
+          {% csrf_token %}
+          <textarea name="message" rows="3" placeholder="Write a message..." class="w-full border rounded px-3 py-2 text-sm" required></textarea>
+          <button class="bg-terracotta hover:bg-terracotta-dark text-white px-4 py-2 rounded-lg text-sm">Send Message</button>
+        </form>
+
+        <div class="max-h-72 overflow-y-auto border rounded p-3 bg-gray-50 space-y-3">
+          {% for msg in monitored_messages %}
+            <div class="bg-white rounded p-3 border">
+              <p class="text-sm"><span class="font-semibold">{{ msg.sender.get_full_name|default:msg.sender.username }}</span> → {{ msg.recipient.get_full_name|default:msg.recipient.username }}</p>
+              <p class="text-sm mt-1">{{ msg.message }}</p>
+              <p class="text-xs text-gray-500 mt-1">{{ msg.created_at|date:"M d, Y H:i" }} {% if msg.flagged %}<span class="text-red-600">• Flagged</span>{% endif %}</p>
+            </div>
+          {% empty %}
+            <p class="text-sm text-gray-500">No booking messages yet.</p>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

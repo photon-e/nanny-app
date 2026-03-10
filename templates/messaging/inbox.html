@@ -3,18 +3,41 @@
 {% block title %}Inbox{% endblock %}
 
 {% block content %}
-<h1>Inbox</h1>
+<section class="max-w-5xl mx-auto">
+  <div class="mb-6 flex items-end justify-between gap-3">
+    <div>
+      <h1 class="text-3xl font-bold text-soft-teal">Inbox</h1>
+      <p class="text-gray-600 mt-1">Open a conversation to view full history and reply.</p>
+    </div>
+    <span class="text-sm text-gray-500">{{ conversations|length }} conversation{{ conversations|length|pluralize }}</span>
+  </div>
 
-{% if messages %}
-    {% for msg in messages %}
-        <div class="card">
-            <p><strong>From:</strong> {{ msg.sender.get_full_name|default:msg.sender.username }}</p>
-            <p>{{ msg.content }}</p>
-            <p><small>{{ msg.timestamp }}</small></p>
-            <a href="{% url 'send_message' msg.sender.id %}">Reply</a>
-        </div>
-    {% endfor %}
-{% else %}
-    <p>No messages yet.</p>
-{% endif %}
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm divide-y">
+    {% if conversations %}
+      {% for convo in conversations %}
+        <a href="{% url 'send_message' convo.other_user.id %}" class="block p-5 hover:bg-gray-50 transition">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <p class="font-semibold text-gray-900 truncate">{{ convo.other_user.get_full_name|default:convo.other_user.username }}</p>
+                {% if convo.unread_count %}
+                  <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-terracotta text-white text-[10px] font-bold">{{ convo.unread_count }}</span>
+                {% endif %}
+              </div>
+              <p class="mt-1 text-sm {% if convo.last_message.receiver_id == user.id and not convo.last_message.read %}text-gray-900 font-medium{% else %}text-gray-600{% endif %} truncate">
+                {% if convo.last_message.sender_id == user.id %}You:{% endif %} {{ convo.last_message.content }}
+              </p>
+            </div>
+            <p class="text-xs text-gray-500 whitespace-nowrap">{{ convo.last_message.timestamp|date:"M d, H:i" }}</p>
+          </div>
+        </a>
+      {% endfor %}
+    {% else %}
+      <div class="p-12 text-center">
+        <p class="text-lg font-semibold text-gray-700">No conversations yet</p>
+        <p class="text-sm text-gray-500 mt-1">Start by messaging a caregiver or family profile.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
 {% endblock %}

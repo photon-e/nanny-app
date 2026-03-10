@@ -1,15 +1,38 @@
 {% extends "layout/base.html" %}
 
-{% block title %}Send Message{% endblock %}
+{% block title %}Conversation{% endblock %}
 
 {% block content %}
-<h1>Send Message to {{ receiver.get_full_name|default:receiver.username }}</h1>
+<section class="max-w-4xl mx-auto">
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="p-5 border-b bg-gray-50 flex items-center justify-between gap-3">
+      <div>
+        <h1 class="text-xl md:text-2xl font-bold text-soft-teal">Conversation with {{ receiver.get_full_name|default:receiver.username }}</h1>
+        <p class="text-sm text-gray-600">Messages are stored for safety and support.</p>
+      </div>
+      <a href="{% url 'inbox' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-white transition">Back to Inbox</a>
+    </div>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Send</button>
-</form>
+    <div class="p-5 h-[26rem] overflow-y-auto bg-off-white space-y-3">
+      {% for msg in thread_messages %}
+        <div class="flex {% if msg.sender_id == user.id %}justify-end{% else %}justify-start{% endif %}">
+          <div class="max-w-[80%] px-4 py-3 rounded-2xl shadow-sm {% if msg.sender_id == user.id %}bg-soft-teal text-white rounded-br-md{% else %}bg-white text-gray-800 rounded-bl-md border border-gray-200{% endif %}">
+            <p class="text-sm">{{ msg.content }}</p>
+            <p class="text-[11px] mt-1 {% if msg.sender_id == user.id %}text-white/80{% else %}text-gray-500{% endif %}">{{ msg.timestamp|date:"M d, Y H:i" }}</p>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-sm text-gray-500 text-center mt-12">No messages in this conversation yet.</p>
+      {% endfor %}
+    </div>
 
-<p><a href="{% url 'inbox' %}">Back to Inbox</a></p>
+    <form method="post" class="p-5 border-t bg-white space-y-3">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="flex justify-end">
+        <button type="submit" class="bg-soft-teal hover:bg-teal-dark text-white px-6 py-2 rounded-lg font-semibold transition shadow">Send</button>
+      </div>
+    </form>
+  </div>
+</section>
 {% endblock %}
