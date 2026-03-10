@@ -6,64 +6,37 @@
 {% block content %}
 <div class="min-h-screen bg-off-white flex">
 
-    <!-- SIDEBAR -->
     <aside class="w-80 hidden md:block bg-white border-r h-screen sticky top-0 p-6">
         <div class="text-center">
             {% if profile.profile_image %}
-                <img src="{{ profile.profile_image.url }}"
-                     class="w-28 h-28 rounded-full mx-auto object-cover shadow"
-                     alt="Profile Picture">
+                <img src="{{ profile.profile_image.url }}" class="w-28 h-28 rounded-full mx-auto object-cover shadow" alt="Profile Picture">
             {% else %}
                 <div class="w-28 h-28 rounded-full bg-teal-light/30 flex items-center justify-center text-soft-teal font-bold text-3xl mx-auto shadow border-2 border-soft-teal">
                     {{ profile.user.first_name|first|default:profile.user.username|first|upper }}
                 </div>
             {% endif %}
 
-            <h2 class="mt-4 text-xl font-bold text-gray-800">
-                {{ profile.user.get_full_name|default:profile.user.username }}
-            </h2>
-
-            {% if profile.location %}
-            <p class="text-gray-500 text-sm">{{ profile.location }}</p>
-            {% endif %}
+            <h2 class="mt-4 text-xl font-bold text-gray-800">{{ profile.user.get_full_name|default:profile.user.username }}</h2>
+            {% if profile.location %}<p class="text-gray-500 text-sm">{{ profile.location }}</p>{% endif %}
         </div>
 
         <nav class="mt-10 space-y-2">
-            <a href="#overview" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">
-                Overview
-            </a>
-            <a href="#families" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">
-                Assigned Families
-            </a>
-            <a href="#messages" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">
-                Messages
-            </a>
-            <a href="{% url 'training_modules' %}" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">
-                Training Modules
-            </a>
-            <a href="{% url 'earnings_wallet' %}" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">
-                Earnings Wallet
-            </a>
-            <a href="#profile" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">
-                Edit Profile
-            </a>
+            <a href="#overview" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">Overview</a>
+            <a href="#bookings" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">Active Bookings</a>
+            <a href="#families" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">Assigned Families</a>
+            <a href="#messages" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">Monitored Chat</a>
+            <a href="{% url 'training_modules' %}" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">Training Modules</a>
+            <a href="{% url 'earnings_wallet' %}" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">Earnings Wallet</a>
+            <a href="#profile" class="block px-4 py-2 rounded-lg hover:bg-teal-light/20 hover:text-soft-teal font-medium transition">Edit Profile</a>
         </nav>
     </aside>
 
-    <!-- MAIN CONTENT -->
     <main class="flex-1 p-6 space-y-8">
-
-        <!-- HEADER -->
         <section id="overview">
-            <h1 class="text-3xl font-bold text-gray-800">
-                Welcome back, {{ profile.user.first_name|default:'Caregiver' }} 👋
-            </h1>
-            <p class="text-gray-600 mt-1">
-                Manage your work, families and profile information here.
-            </p>
+            <h1 class="text-3xl font-bold text-gray-800">Welcome back, {{ profile.user.first_name|default:'Caregiver' }} 👋</h1>
+            <p class="text-gray-600 mt-1">Manage your active bookings, monitored chat, and profile information.</p>
         </section>
 
-        <!-- Availability Toggle -->
         <section class="bg-white rounded-xl shadow border p-6">
             <div class="flex justify-between items-center">
                 <div>
@@ -71,116 +44,78 @@
                     <p class="text-gray-500 text-sm">Toggle your visibility to parents</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" 
-                           id="availability-toggle" 
-                           class="sr-only peer" 
-                           {% if profile.is_available %}checked{% endif %}
-                           onchange="toggleAvailability()">
+                    <input type="checkbox" id="availability-toggle" class="sr-only peer" {% if profile.is_available %}checked{% endif %} onchange="toggleAvailability()">
                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-soft-teal/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-soft-teal"></div>
-                    <span class="ml-3 text-sm font-medium text-gray-700" id="availability-status">
-                        {% if profile.is_available %}Available{% else %}Unavailable{% endif %}
-                    </span>
+                    <span class="ml-3 text-sm font-medium text-gray-700" id="availability-status">{% if profile.is_available %}Available{% else %}Unavailable{% endif %}</span>
                 </label>
             </div>
-            {% if profile.verified %}
-            <div class="mt-4 flex items-center space-x-2">
-                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-navy text-white border-2 border-navy shadow-sm">
-                    ✓ Verified
-                </span>
-            </div>
-            {% else %}
-            <div class="mt-4">
-                <p class="text-sm text-gray-600">Complete training modules to get verified.</p>
-                <a href="{% url 'training_modules' %}" class="text-soft-teal hover:text-teal-dark text-sm font-medium transition">Start Training →</a>
-            </div>
-            {% endif %}
         </section>
 
-        <!-- DASH CARDS -->
         <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white p-5 rounded-xl shadow border">
-                <p class="text-gray-500 text-sm">Assigned Families</p>
-                <p class="text-4xl font-bold mt-2">{{ assigned_families|length }}</p>
-            </div>
-
-            <div class="bg-white p-5 rounded-xl shadow border">
-                <p class="text-gray-500 text-sm">Messages</p>
-                <p class="text-4xl font-bold mt-2">{{ messages|length }}</p>
-            </div>
-
-            <div class="bg-white p-5 rounded-xl shadow border">
-                <p class="text-gray-500 text-sm">Training Status</p>
-                <p class="text-4xl font-bold mt-2">
-                    {% if profile.verified %}✓{% else %}—{% endif %}
-                </p>
-            </div>
+            <div class="bg-white p-5 rounded-xl shadow border"><p class="text-gray-500 text-sm">Assigned Families</p><p class="text-4xl font-bold mt-2">{{ assigned_families|length }}</p></div>
+            <div class="bg-white p-5 rounded-xl shadow border"><p class="text-gray-500 text-sm">Recent Monitored Messages</p><p class="text-4xl font-bold mt-2">{{ messages|length }}</p></div>
+            <div class="bg-white p-5 rounded-xl shadow border"><p class="text-gray-500 text-sm">Training Status</p><p class="text-4xl font-bold mt-2">{% if profile.verified %}✓{% else %}—{% endif %}</p></div>
         </section>
 
-        <!-- FAMILIES -->
+        <section id="bookings" class="bg-white rounded-xl shadow border p-6">
+            <h2 class="text-xl font-bold mb-4">Active Bookings</h2>
+            {% if recent_bookings %}
+            <ul class="divide-y">
+                {% for booking in recent_bookings %}
+                <li class="py-3 flex justify-between items-center">
+                    <div>
+                        <p class="font-medium">{{ booking.family.user.get_full_name|default:booking.family.user.username }}</p>
+                        <p class="text-gray-500 text-sm">{{ booking.get_status_display }}{% if booking.service_start %} • {{ booking.service_start|date:"M d, Y H:i" }}{% endif %}</p>
+                    </div>
+                    <a href="{% url 'active_booking' booking.id %}" class="text-soft-teal font-medium text-sm">Open Workspace →</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}<p class="text-gray-500">No bookings assigned yet.</p>{% endif %}
+        </section>
+
         <section id="families" class="bg-white rounded-xl shadow border p-6">
             <h2 class="text-xl font-bold mb-4">Assigned Families</h2>
-
             {% if assigned_families %}
             <ul class="divide-y">
                 {% for family in assigned_families %}
-                <li class="py-3 flex justify-between">
-                    <span class="font-medium">{{ family.full_name }}</span>
-                    <span class="text-gray-500 text-sm">{{ family.location }}</span>
-                </li>
+                <li class="py-3 flex justify-between"><span class="font-medium">{{ family.full_name }}</span><span class="text-gray-500 text-sm">{{ family.location }}</span></li>
                 {% endfor %}
             </ul>
-            {% else %}
-            <p class="text-gray-500">No families assigned yet.</p>
-            {% endif %}
+            {% else %}<p class="text-gray-500">No families assigned yet.</p>{% endif %}
         </section>
 
-        <!-- MESSAGES -->
         <section id="messages" class="bg-white rounded-xl shadow border p-6">
-            <h2 class="text-xl font-bold mb-4">Recent Messages</h2>
-
+            <h2 class="text-xl font-bold mb-4">Recent Monitored Messages</h2>
             {% if messages %}
             <ul class="divide-y">
                 {% for msg in messages %}
-                <li class="py-3 flex justify-between">
-                    <span class="font-medium">{{ msg.subject }}</span>
-                    <span class="text-gray-500 text-sm">{{ msg.date_sent }}</span>
+                <li class="py-3 flex justify-between items-center gap-3">
+                    <div>
+                        <p class="font-medium">{{ msg.sender.get_full_name|default:msg.sender.username }}: {{ msg.message|truncatechars:70 }}</p>
+                        <p class="text-gray-500 text-sm">Booking #{{ msg.booking.id }}{% if msg.flagged %} • <span class="text-red-600">Flagged</span>{% endif %}</p>
+                    </div>
+                    <a href="{% url 'active_booking' msg.booking.id %}" class="text-soft-teal text-sm">View</a>
                 </li>
                 {% endfor %}
             </ul>
-            {% else %}
-            <p class="text-gray-500">No messages yet.</p>
-            {% endif %}
+            {% else %}<p class="text-gray-500">No messages yet.</p>{% endif %}
         </section>
 
-        <!-- PROFILE FORM -->
         <section id="profile" class="bg-white rounded-xl shadow border p-6 mb-12">
             <h2 class="text-xl font-bold mb-4">Edit Profile</h2>
-
             <form method="POST" enctype="multipart/form-data" class="space-y-4">
                 {% csrf_token %}
-
                 {% for field in form %}
                 <div>
-                    <label class="font-medium text-gray-700 block mb-1">
-                        {{ field.label }}
-                    </label>
-
-                    <div class="border rounded-lg px-3 py-2 bg-off-white">
-                        {{ field }}
-                    </div>
-
-                    {% if field.errors %}
-                    <p class="text-red-500 text-sm mt-1">{{ field.errors.0 }}</p>
-                    {% endif %}
+                    <label class="font-medium text-gray-700 block mb-1">{{ field.label }}</label>
+                    <div class="border rounded-lg px-3 py-2 bg-off-white">{{ field }}</div>
+                    {% if field.errors %}<p class="text-red-500 text-sm mt-1">{{ field.errors.0 }}</p>{% endif %}
                 </div>
                 {% endfor %}
-
-                <button class="w-full bg-soft-teal hover:bg-teal-dark text-white py-3 rounded-lg font-semibold">
-                    Save Changes
-                </button>
+                <button class="w-full bg-soft-teal hover:bg-teal-dark text-white py-3 rounded-lg font-semibold">Save Changes</button>
             </form>
         </section>
-
     </main>
 </div>
 
@@ -188,28 +123,17 @@
 function toggleAvailability() {
     const toggle = document.getElementById('availability-toggle');
     const status = document.getElementById('availability-status');
-    
     fetch('{% url "toggle_availability" %}', {
         method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json',
-        },
+        headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json'},
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
             status.textContent = data.is_available ? 'Available' : 'Unavailable';
-        } else {
-            // Revert toggle on error
-            toggle.checked = !toggle.checked;
-            alert('Error updating availability. Please try again.');
-        }
+        } else { toggle.checked = !toggle.checked; alert('Error updating availability. Please try again.'); }
     })
-    .catch(error => {
-        toggle.checked = !toggle.checked;
-        alert('Error updating availability. Please try again.');
-    });
+    .catch(() => { toggle.checked = !toggle.checked; alert('Error updating availability. Please try again.'); });
 }
 </script>
 {% endblock %}

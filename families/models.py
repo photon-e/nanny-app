@@ -92,6 +92,10 @@ class Booking(models.Model):
         "caregivers.CaregiverProfile", on_delete=models.CASCADE, related_name="bookings"
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    service_start = models.DateTimeField(null=True, blank=True)
+    service_end = models.DateTimeField(null=True, blank=True)
+    service_location_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    service_location_lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     payment_provider = models.CharField(max_length=20, choices=PROVIDER_CHOICES)
     provider_reference = models.CharField(
         max_length=255, blank=True, help_text="Gateway reference / transaction ID"
