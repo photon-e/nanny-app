@@ -74,6 +74,42 @@
         </div>
       </section>
     </div>
+
+    <section class="bg-white rounded-xl shadow p-6 border">
+      <h2 class="text-xl font-bold mb-3">Rate this caregiver</h2>
+      {% if existing_review %}
+        <p class="text-gray-700">You already submitted a review: ⭐ {{ existing_review.overall_rating }}/5.</p>
+      {% elif can_review %}
+        <form method="post" action="{% url 'booking_submit_review' booking.id %}" class="grid md:grid-cols-2 gap-4">
+          {% csrf_token %}
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Overall rating</label>
+            {{ review_form.overall_rating }}
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Punctuality</label>
+            {{ review_form.punctuality_rating }}
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Communication</label>
+            {{ review_form.communication_rating }}
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Professionalism</label>
+            {{ review_form.professionalism_rating }}
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Comment (optional)</label>
+            {{ review_form.comment }}
+          </div>
+          <div class="md:col-span-2">
+            <button class="bg-soft-teal hover:bg-teal-dark text-white px-4 py-2 rounded-lg text-sm">Submit Review</button>
+          </div>
+        </form>
+      {% else %}
+        <p class="text-gray-500 text-sm">Review becomes available when this booking is marked as released.</p>
+      {% endif %}
+    </section>
   </div>
 </div>
 {% endblock %}

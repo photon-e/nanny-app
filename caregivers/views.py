@@ -1,11 +1,10 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from .models import (
     CaregiverProfile, Guarantor, CodeOfConductSignature, 
     TrainingModule, TrainingQuiz, TrainingCompletion, EarningsWallet
 )
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
@@ -16,10 +15,10 @@ from .forms import (
 )
 
 
-from django.db.models import Q
+from django.db.models import Avg, Count, Q
 from decimal import Decimal, InvalidOperation
 
-from families.models import Booking
+from families.models import Booking, CaregiverReview
 from core.models import MonitoredMessage
 
 
@@ -42,12 +41,12 @@ def _parse_decimal(value):
         return None
 
 
-from families.models import Booking
-from core.models import MonitoredMessage
-
 def caregiver_list(request):
     q = (request.GET.get("q") or "").strip()
-    caregivers = CaregiverProfile.objects.select_related("user")
+    caregivers = CaregiverProfile.objects.select_related("user").annotate(
+        average_rating=Avg("reviews__overall_rating", filter=Q(reviews__is_visible=True)),
+        review_count=Count("reviews", filter=Q(reviews__is_visible=True), distinct=True),
+    )
 
     q = (request.GET.get("q") or "").strip()
     location = (request.GET.get("location") or "").strip()
@@ -85,8 +84,16 @@ def caregiver_list(request):
 
 def caregiver_detail(request, pk):
     caregiver = get_object_or_404(CaregiverProfile, pk=pk)
+    visible_reviews = CaregiverReview.objects.filter(caregiver=caregiver, is_visible=True).select_related(
+        "family__user"
+    )
+    rating_summary = visible_reviews.aggregate(avg_rating=Avg("overall_rating"), review_count=Count("id"))
+
     return render(request, "caregivers/profile_detail.html", {
-        "caregiver": caregiver
+        "caregiver": caregiver,
+        "reviews": visible_reviews[:10],
+        "average_rating": rating_summary["avg_rating"],
+        "review_count": rating_summary["review_count"],
     })
 
 @login_required

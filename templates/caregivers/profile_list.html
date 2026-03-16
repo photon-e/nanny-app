@@ -136,6 +136,14 @@
                 {% endif %}
               </div>
 
+              <div class="mb-4 text-sm text-gray-700">
+                {% if caregiver.review_count %}
+                  ⭐ {{ caregiver.average_rating|floatformat:1 }}/5 ({{ caregiver.review_count }} review{{ caregiver.review_count|pluralize }})
+                {% else %}
+                  ⭐ No reviews yet
+                {% endif %}
+              </div>
+
               <!-- CTA -->
               <span class="inline-flex items-center gap-1.5 text-soft-teal font-medium text-sm group-hover:gap-2 transition-all">
                 View profile

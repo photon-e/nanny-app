@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
+from families.forms import CaregiverReviewForm
 from families.models import Booking
 from .models import GeofenceCheckin, MonitoredMessage, PanicAlert
 from .utils import check_geofence, generate_service_agreement_pdf, send_service_agreement_email
@@ -62,8 +63,53 @@ def active_booking(request, booking_id):
             "monitored_messages": monitored_messages,
             "latest_checkin": latest_checkin,
             "can_checkin": request.user == booking.caregiver.user,
+            "can_review": request.user == booking.family.user and booking.status == "released",
+            "existing_review": getattr(booking, "review", None),
+            "review_form": CaregiverReviewForm(),
         },
     )
+
+
+@login_required
+@require_http_methods(["POST"])
+def booking_submit_review(request, booking_id):
+    booking = _get_accessible_booking(request, booking_id)
+    if booking is None or request.user != booking.family.user:
+        messages.error(request, "Unauthorized.")
+        return redirect("/")
+
+    if booking.status != "released":
+        messages.error(request, "You can only review completed bookings.")
+        return redirect("active_booking", booking_id=booking.id)
+
+    if hasattr(booking, "review"):
+        messages.info(request, "A review has already been submitted for this booking.")
+        return redirect("active_booking", booking_id=booking.id)
+
+    form = CaregiverReviewForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Please provide valid ratings before submitting your review.")
+        return redirect("active_booking", booking_id=booking.id)
+
+    review = form.save(commit=False)
+    review.booking = booking
+    review.family = booking.family
+    review.caregiver = booking.caregiver
+
+    if review.overall_rating <= 2:
+        review.flagged = True
+        review.flag_reason = "Low rating - suggest family follow-up"
+
+    review.save()
+    messages.success(request, "Thanks! Your review has been submitted.")
+
+    if review.overall_rating <= 2:
+        messages.warning(
+            request,
+            "If this issue involved safety or misconduct, please file an incident report for investigation.",
+        )
+
+    return redirect("active_booking", booking_id=booking.id)
 
 
 @login_required
