@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
 from django.contrib import messages
-from django.db.models import Count, Q, Case, When, Value, BooleanField
+from django.db.models import Avg, Count, Q, Case, When, Value, BooleanField
 from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
@@ -35,6 +36,9 @@ def family_dashboard(request):
     pickups = profile.authorized_pickups.all()
     recent_bookings = profile.bookings.select_related("caregiver", "caregiver__user").all()[:5]
     incidents = profile.incidents.all()[:5]
+    incident_caregivers = CaregiverProfile.objects.filter(
+        bookings__family=profile
+    ).select_related("user").distinct().order_by("user__first_name", "user__last_name", "user__username")
 
     return render(
         request,
@@ -45,6 +49,7 @@ def family_dashboard(request):
             "authorized_pickups": pickups,
             "recent_bookings": recent_bookings,
             "incidents": incidents,
+            "incident_caregivers": incident_caregivers,
         },
     )
 
@@ -60,6 +65,7 @@ def caregiver_search(request):
     q = request.GET.get("q")
     location = request.GET.get("location")
     verification = request.GET.get("verification")  # "gold" / "standard" / None
+    sort = request.GET.get("sort") or "recommended"
 
     caregivers = CaregiverProfile.objects.select_related("user").filter(is_available=True)
 
@@ -94,17 +100,51 @@ def caregiver_search(request):
             default=Value(False),
             output_field=BooleanField(),
         ),
+        average_rating=Avg("reviews__overall_rating", filter=Q(reviews__is_visible=True)),
+        review_count=Count("reviews", filter=Q(reviews__is_visible=True), distinct=True),
     )
+
+    sort_options = {
+        "recommended": ["-verified", "-registration_level", "-review_count", "-created_at"],
+        "highest_rated": ["-average_rating", "-review_count", "-verified"],
+        "lowest_rate": ["hourly_rate", "-verified"],
+        "most_experienced": ["-experience_years", "-verified"],
+    }
+    caregivers = caregivers.order_by(*sort_options.get(sort, sort_options["recommended"]))
+
+    paginator = Paginator(caregivers, 9)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    active_filters = []
+    if q:
+        active_filters.append({"label": f'Keyword: "{q}"', "param": "q"})
+    if location:
+        active_filters.append({"label": f'Location: "{location}"', "param": "location"})
+    if verification == "gold":
+        active_filters.append({"label": "Gold verification", "param": "verification"})
+    elif verification == "standard":
+        active_filters.append({"label": "Standard verification", "param": "verification"})
+
+    query_params = request.GET.copy()
+    if "page" in query_params:
+        query_params.pop("page")
+    query_string = query_params.urlencode()
 
     return render(
         request,
         "families/caregiver_search.html",
         {
             "profile": profile,
-            "caregivers": caregivers,
+            "caregivers": page_obj.object_list,
+            "page_obj": page_obj,
+            "result_count": paginator.count,
+            "active_filters": active_filters,
+            "query_string": query_string,
             "search_q": q or "",
             "search_location": location or "",
             "search_verification": verification or "",
+            "search_sort": sort,
         },
     )
 
@@ -203,9 +243,10 @@ def report_incident(request):
         caregiver = None
         if caregiver_id:
             try:
-                caregiver = CaregiverProfile.objects.get(id=caregiver_id)
+                caregiver = CaregiverProfile.objects.filter(bookings__family=profile).distinct().get(id=caregiver_id)
             except CaregiverProfile.DoesNotExist:
-                caregiver = None
+                messages.error(request, "Please select a caregiver from your booking history.")
+                return redirect("family_dashboard")
 
         if incident_type not in dict(IncidentReport.INCIDENT_CHOICES):
             messages.error(request, "Please select a valid incident type.")
@@ -219,4 +260,3 @@ def report_incident(request):
             messages.success(request, "Incident reported. Our team will review it.")
 
     return redirect("family_dashboard")
-

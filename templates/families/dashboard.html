@@ -6,14 +6,6 @@
 <div class="min-h-screen bg-off-white py-8">
   <h1 class="text-3xl font-bold mb-6 text-soft-teal">Family Dashboard</h1>
 
-  {% if messages %}
-    {% for message in messages %}
-      <div class="mb-4 p-3 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
-
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Left column: profile + authorized pickups -->
     <div class="space-y-6 lg:col-span-1">
@@ -103,7 +95,12 @@
             <option value="theft_suspicion">Theft Suspicion</option>
             <option value="misconduct">Misconduct</option>
           </select>
-          <input type="number" name="caregiver_id" placeholder="Caregiver ID (optional)" class="w-full border rounded px-3 py-2 text-sm">
+          <select name="caregiver_id" class="w-full border rounded px-3 py-2 text-sm">
+            <option value="">Select caregiver (optional)</option>
+            {% for caregiver in incident_caregivers %}
+              <option value="{{ caregiver.id }}">{{ caregiver.user.get_full_name|default:caregiver.user.username }}</option>
+            {% endfor %}
+          </select>
           <textarea name="description" rows="3" placeholder="Describe what happened (optional)" class="w-full border rounded px-3 py-2 text-sm"></textarea>
           <button class="bg-red-600 text-white px-4 py-2 rounded text-sm">
             Report Incident

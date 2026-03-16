@@ -49,9 +49,13 @@
             </div>
 
             {% if user.is_authenticated and user.is_family %}
-            <div>
+            <div class="flex flex-wrap gap-3">
+                <a href="{% url 'create_booking' caregiver.id %}"
+                   class="bg-terracotta hover:bg-terracotta-dark text-white px-6 py-3 rounded-lg font-semibold transition">
+                    Book Now
+                </a>
                 <a href="{% url 'send_message' caregiver.user.id %}"
-                   class="bg-soft-teal text-white px-6 py-3 rounded-lg">
+                   class="bg-soft-teal hover:bg-teal-dark text-white px-6 py-3 rounded-lg transition">
                     Message Caregiver
                 </a>
             </div>
