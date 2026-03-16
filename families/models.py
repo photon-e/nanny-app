@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 User = settings.AUTH_USER_MODEL
 
@@ -117,3 +118,29 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking {self.id} - {self.family.user.username} → {self.caregiver.user.username}"
+
+
+class CaregiverReview(models.Model):
+    """Post-booking family feedback for a caregiver."""
+
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name="review")
+    family = models.ForeignKey(FamilyProfile, on_delete=models.CASCADE, related_name="caregiver_reviews")
+    caregiver = models.ForeignKey(
+        "caregivers.CaregiverProfile", on_delete=models.CASCADE, related_name="reviews"
+    )
+    overall_rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    punctuality_rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    communication_rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    professionalism_rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    comment = models.TextField(blank=True)
+    is_visible = models.BooleanField(default=True)
+    flagged = models.BooleanField(default=False)
+    flag_reason = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Review for Booking {self.booking_id} ({self.overall_rating}/5)"

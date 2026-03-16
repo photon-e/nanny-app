@@ -10,9 +10,27 @@ from .models import Message
 
 @login_required
 def inbox(request):
-    # Show messages for the logged-in user
-    inbox_messages = request.user.received_messages.order_by('-timestamp')
-    return render(request, 'messaging/inbox.html', {'inbox_messages': inbox_messages})
+    inbox_messages = request.user.received_messages.select_related("sender").order_by('-timestamp')
+    sent_messages = request.user.sent_messages.select_related("receiver").order_by('-timestamp')
+
+    conversation_map = {}
+
+    for message in inbox_messages:
+        conversation_map.setdefault(message.sender_id, message)
+
+    for message in sent_messages:
+        conversation_map.setdefault(message.receiver_id, message)
+
+    conversations = sorted(conversation_map.values(), key=lambda msg: msg.timestamp, reverse=True)
+
+    return render(
+        request,
+        'messaging/inbox.html',
+        {
+            'inbox_messages': inbox_messages,
+            'conversations': conversations,
+        },
+    )
 
 
 @login_required

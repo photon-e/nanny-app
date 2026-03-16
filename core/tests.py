@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from caregivers.models import CaregiverProfile
-from families.models import Booking, FamilyProfile
+from families.models import Booking, CaregiverReview, FamilyProfile
 from .models import GeofenceCheckin, MonitoredMessage
 
 
@@ -71,3 +71,49 @@ class ActiveBookingFlowTests(TestCase):
         )
         checkin = GeofenceCheckin.objects.get(booking=self.booking)
         self.assertTrue(checkin.verified)
+
+    def test_family_can_submit_review_on_released_booking(self):
+        self.booking.status = "released"
+        self.booking.save(update_fields=["status"])
+        self.client.login(username="family", password="pass123")
+        response = self.client.post(
+            reverse("booking_submit_review", args=[self.booking.id]),
+            {
+                "overall_rating": 5,
+                "punctuality_rating": 4,
+                "communication_rating": 5,
+                "professionalism_rating": 5,
+                "comment": "Excellent service",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        review = CaregiverReview.objects.get(booking=self.booking)
+        self.assertEqual(review.overall_rating, 5)
+
+    def test_family_cannot_submit_review_before_release(self):
+        self.client.login(username="family", password="pass123")
+        self.client.post(
+            reverse("booking_submit_review", args=[self.booking.id]),
+            {
+                "overall_rating": 3,
+                "punctuality_rating": 3,
+                "communication_rating": 3,
+                "professionalism_rating": 3,
+            },
+        )
+        self.assertFalse(CaregiverReview.objects.filter(booking=self.booking).exists())
+
+    def test_only_family_can_submit_review(self):
+        self.booking.status = "released"
+        self.booking.save(update_fields=["status"])
+        self.client.login(username="caregiver", password="pass123")
+        self.client.post(
+            reverse("booking_submit_review", args=[self.booking.id]),
+            {
+                "overall_rating": 4,
+                "punctuality_rating": 4,
+                "communication_rating": 4,
+                "professionalism_rating": 4,
+            },
+        )
+        self.assertFalse(CaregiverReview.objects.filter(booking=self.booking).exists())

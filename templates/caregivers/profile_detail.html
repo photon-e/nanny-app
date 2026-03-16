@@ -108,9 +108,33 @@
 
             <!-- Reviews Placeholder -->
             <h2 class="text-xl font-bold mb-3">Reviews</h2>
+            <div class="mb-4 text-gray-700">
+                {% if review_count %}
+                    ⭐ {{ average_rating|floatformat:1 }}/5 from {{ review_count }} review{{ review_count|pluralize }}
+                {% else %}
+                    ⭐ No ratings yet.
+                {% endif %}
+            </div>
 
-            <div class="bg-off-white border rounded-xl p-5 text-gray-600">
-                ⭐ Reviews are coming soon. Families will soon be able to rate caregivers here.
+            <div class="space-y-4">
+                {% for review in reviews %}
+                    <article class="bg-off-white border rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="font-semibold text-gray-900">{{ review.family.user.get_full_name|default:review.family.user.username }}</p>
+                            <p class="text-sm text-gray-600">{{ review.created_at|date:"M d, Y" }}</p>
+                        </div>
+                        <p class="text-sm text-gray-700 mb-2">Overall: ⭐ {{ review.overall_rating }}/5</p>
+                        {% if review.comment %}
+                            <p class="text-gray-700">{{ review.comment }}</p>
+                        {% else %}
+                            <p class="text-gray-500 italic">No written comment.</p>
+                        {% endif %}
+                    </article>
+                {% empty %}
+                    <div class="bg-off-white border rounded-xl p-5 text-gray-600">
+                        No family reviews have been published for this caregiver yet.
+                    </div>
+                {% endfor %}
             </div>
 
             <hr class="my-6">
