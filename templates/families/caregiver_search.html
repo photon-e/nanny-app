@@ -12,7 +12,7 @@
 
     <!-- Search Form -->
     <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mb-6">
-      <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4">
         <input type="text" name="q" value="{{ search_q }}" placeholder="🔍 Name or keyword"
                class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
         <input type="text" name="location" value="{{ search_location }}" placeholder="📍 Location"
@@ -22,10 +22,31 @@
           <option value="gold" {% if search_verification == 'gold' %}selected{% endif %}>⭐ Gold (Verified)</option>
           <option value="standard" {% if search_verification == 'standard' %}selected{% endif %}>✓ Standard</option>
         </select>
+        <select name="sort" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <option value="recommended" {% if search_sort == 'recommended' %}selected{% endif %}>Recommended</option>
+          <option value="highest_rated" {% if search_sort == 'highest_rated' %}selected{% endif %}>Highest rated</option>
+          <option value="lowest_rate" {% if search_sort == 'lowest_rate' %}selected{% endif %}>Lowest rate</option>
+          <option value="most_experienced" {% if search_sort == 'most_experienced' %}selected{% endif %}>Most experienced</option>
+        </select>
         <button class="bg-soft-teal hover:bg-teal-dark text-white px-6 py-2 rounded-lg font-semibold transition shadow-md">
           Search
         </button>
       </form>
+    </div>
+
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <p class="text-sm text-gray-600">
+        {{ result_count }} caregiver{{ result_count|pluralize }} found.
+      </p>
+      {% if active_filters %}
+      <div class="flex flex-wrap gap-2">
+        {% for filter in active_filters %}
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs bg-gray-100 border border-gray-200 text-gray-700">
+            {{ filter.label }}
+          </span>
+        {% endfor %}
+      </div>
+      {% endif %}
     </div>
 
     <!-- Results -->
@@ -110,6 +131,14 @@
                 <span class="text-gray-400">Rate not set</span>
               {% endif %}
             </div>
+
+            <div class="mb-2 text-sm text-gray-700">
+              {% if c.review_count %}
+                ⭐ {{ c.average_rating|floatformat:1 }}/5 ({{ c.review_count }} review{{ c.review_count|pluralize }})
+              {% else %}
+                ⭐ No reviews yet
+              {% endif %}
+            </div>
           </div>
 
           <!-- Action Button -->
@@ -130,6 +159,20 @@
         </div>
       {% endfor %}
     </div>
+
+    {% if page_obj and page_obj.paginator.num_pages > 1 %}
+      <nav class="mt-8 flex justify-center items-center gap-2 text-sm" aria-label="Search result pages">
+        {% if page_obj.has_previous %}
+          <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.previous_page_number }}" class="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">Previous</a>
+        {% endif %}
+
+        <span class="px-3 py-2 text-gray-600">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+          <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.next_page_number }}" class="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">Next</a>
+        {% endif %}
+      </nav>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
