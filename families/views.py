@@ -1,20 +1,113 @@
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.shortcuts import redirect, render
-from django.contrib import messages
-from django.db.models import Avg, Count, Q, Case, When, Value, BooleanField
-from django.utils import timezone
+import json
 from datetime import timedelta
 from decimal import Decimal
 
-from .forms import FamilyProfileForm
-from .models import AuthorizedPickup, Booking, FamilyProfile, IncidentReport
+from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Avg, BooleanField, Case, Count, Q, Value, When
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_http_methods
+
 from caregivers.models import CaregiverProfile
+
+from .forms import FamilyProfileForm
+from .models import AuthorizedPickup, Booking, FamilyProfile, IncidentReport, PaymentEvent
+from .payments import (
+    PaymentGatewayError,
+    initialize_checkout,
+    validate_webhook_signature,
+    verify_transaction,
+)
 
 
 def _get_or_create_family_profile(user):
     profile, _ = FamilyProfile.objects.get_or_create(user=user, defaults={"location": ""})
     return profile
+
+
+def _apply_payment_success(booking, reference, message="Payment captured and moved to escrow"):
+    if booking.status in ["released", "refunded"]:
+        return False
+
+    booking.status = "escrow"
+    booking.provider_reference = reference
+    booking.payment_verified_at = timezone.now()
+    booking.last_payment_error = ""
+    booking.save(update_fields=["status", "provider_reference", "payment_verified_at", "last_payment_error"])
+    PaymentEvent.objects.create(
+        booking=booking,
+        provider=booking.payment_provider,
+        reference=reference,
+        event_type="charge.success",
+        status="processed",
+        message=message,
+    )
+    return True
+
+
+def _apply_payment_failure(booking, reference, message="Payment failed"):
+    if booking.status in ["released", "refunded"]:
+        return False
+
+    booking.status = "pending"
+    booking.last_payment_error = message
+    if reference:
+        booking.provider_reference = reference
+        booking.save(update_fields=["status", "last_payment_error", "provider_reference"])
+    else:
+        booking.save(update_fields=["status", "last_payment_error"])
+    PaymentEvent.objects.create(
+        booking=booking,
+        provider=booking.payment_provider,
+        reference=reference or booking.checkout_reference,
+        event_type="charge.failed",
+        status="processed",
+        message=message,
+    )
+    return True
+
+def _process_webhook_payload(payload):
+    event_type = payload.get("event", "unknown")
+    data = payload.get("data", {})
+    reference = data.get("reference")
+
+    if not reference:
+        return False, "missing reference"
+
+    booking = Booking.objects.filter(checkout_reference=reference).first()
+    if not booking:
+        return True, "no matching booking"
+
+    payment_event = PaymentEvent.objects.create(
+        booking=booking,
+        provider=booking.payment_provider,
+        reference=reference,
+        event_type=event_type,
+        status="received",
+        payload=payload,
+    )
+
+    if event_type in ["charge.success", "payment.success"]:
+        changed = _apply_payment_success(booking, reference, "Webhook payment success")
+        payment_event.status = "processed" if changed else "ignored"
+        payment_event.message = "Escrow updated" if changed else "Booking already finalized"
+    elif event_type in ["charge.failed", "payment.failed"]:
+        changed = _apply_payment_failure(booking, reference, data.get("gateway_response", "payment failed"))
+        payment_event.status = "processed" if changed else "ignored"
+        payment_event.message = "Failure reconciled" if changed else "Booking already finalized"
+    else:
+        payment_event.status = "ignored"
+        payment_event.message = "Unsupported event"
+
+    payment_event.save(update_fields=["status", "message"])
+    return True, "ok"
+
 
 
 @login_required
@@ -36,9 +129,12 @@ def family_dashboard(request):
     pickups = profile.authorized_pickups.all()
     recent_bookings = profile.bookings.select_related("caregiver", "caregiver__user").all()[:5]
     incidents = profile.incidents.all()[:5]
-    incident_caregivers = CaregiverProfile.objects.filter(
-        bookings__family=profile
-    ).select_related("user").distinct().order_by("user__first_name", "user__last_name", "user__username")
+    incident_caregivers = (
+        CaregiverProfile.objects.filter(bookings__family=profile)
+        .select_related("user")
+        .distinct()
+        .order_by("user__first_name", "user__last_name", "user__username")
+    )
 
     return render(
         request,
@@ -71,23 +167,17 @@ def caregiver_search(request):
 
     if q:
         caregivers = caregivers.filter(
-            Q(user__first_name__icontains=q)
-            | Q(user__last_name__icontains=q)
-            | Q(bio__icontains=q)
+            Q(user__first_name__icontains=q) | Q(user__last_name__icontains=q) | Q(bio__icontains=q)
         )
 
     if location:
         caregivers = caregivers.filter(location__icontains=location)
 
-    # Map verification levels:
-    # - Gold: verified flag True
-    # - Standard: not verified but completed Level 2
     if verification == "gold":
         caregivers = caregivers.filter(verified=True)
     elif verification == "standard":
         caregivers = caregivers.filter(verified=False, registration_level__gte=2)
 
-    # Annotate trust score (simple flags derived from fields; no sensitive IDs)
     caregivers = caregivers.annotate(
         has_id=Case(
             When(nin_document__isnull=False, then=Value(True)),
@@ -151,23 +241,19 @@ def caregiver_search(request):
 
 @login_required
 def create_booking(request, caregiver_id):
-    """Create a basic booking record before redirecting to payment gateway."""
     if not request.user.is_family:
         return redirect("/")
 
     profile = _get_or_create_family_profile(request.user)
-
     caregiver = CaregiverProfile.objects.select_related("user").get(id=caregiver_id)
 
-    # For now, use a simple fixed amount and provider; you can plug in actual amounts later
-    amount = 10000  # e.g. 10000 NGN placeholder
+    amount = caregiver.hourly_rate or Decimal("10000")
     provider = profile.default_payment_provider or "paystack"
 
-    # Calculate commission (15%)
-    commission_rate = Decimal('0.15')
+    commission_rate = Decimal("0.15")
     agent_commission = amount * commission_rate
     caregiver_payout = amount - agent_commission
-    
+
     service_start = timezone.now() + timedelta(days=1)
     service_end = service_start + timedelta(hours=8)
 
@@ -184,21 +270,167 @@ def create_booking(request, caregiver_id):
         agent_commission=agent_commission,
         caregiver_payout=caregiver_payout,
     )
-    
-    # Auto-generate service agreement PDF (works with or without reportlab)
+
     try:
         from core.utils import generate_service_agreement_pdf, send_service_agreement_email
+
         pdf_buffer = generate_service_agreement_pdf(booking)
         send_service_agreement_email(booking, pdf_buffer)
-    except Exception as e:
-        # Log error but don't fail booking
-        print(f"Error generating agreement: {e}")
+    except Exception as exc:  # noqa: BLE001
+        print(f"Error generating agreement: {exc}")
 
-    messages.info(
-        request,
-        "Booking created. Open the active booking workspace to track status, check-ins, and monitored chat.",
+    return redirect("start_booking_checkout", booking_id=booking.id)
+
+
+@login_required
+def start_booking_checkout(request, booking_id):
+    booking = get_object_or_404(Booking.objects.select_related("family__user"), id=booking_id)
+    if request.user != booking.family.user:
+        messages.error(request, "Unauthorized.")
+        return redirect("/")
+
+    if booking.status == "released":
+        messages.info(request, "This booking has already been completed.")
+        return redirect("active_booking", booking_id=booking.id)
+
+    try:
+        session = initialize_checkout(request, booking)
+    except PaymentGatewayError as exc:
+        booking.last_payment_error = str(exc)
+        booking.save(update_fields=["last_payment_error"])
+        messages.error(request, "Unable to initialize checkout right now. Please try again.")
+        return redirect("family_dashboard")
+
+    booking.checkout_reference = session.reference
+    booking.last_payment_error = ""
+    booking.save(update_fields=["checkout_reference", "last_payment_error"])
+
+    PaymentEvent.objects.create(
+        booking=booking,
+        provider=booking.payment_provider,
+        reference=session.reference,
+        event_type="checkout.initialized",
+        status="processed",
+        message="Checkout session started",
     )
-    return redirect("family_dashboard")
+
+    return redirect(session.checkout_url)
+
+
+@require_GET
+@login_required
+def payment_return(request):
+    reference = request.GET.get("reference", "")
+    if not reference:
+        messages.error(request, "Missing payment reference.")
+        return redirect("family_dashboard")
+
+    booking = get_object_or_404(Booking, checkout_reference=reference)
+    if request.user != booking.family.user:
+        messages.error(request, "Unauthorized.")
+        return redirect("/")
+
+    try:
+        verification = verify_transaction(reference, booking.payment_provider)
+    except PaymentGatewayError:
+        messages.error(request, "We could not verify this payment yet. Please check back shortly.")
+        return redirect("active_booking", booking_id=booking.id)
+
+    if verification["status"]:
+        _apply_payment_success(booking, verification["reference"], verification.get("gateway_response", "verified"))
+        messages.success(request, "Payment confirmed and held in escrow.")
+    else:
+        _apply_payment_failure(booking, verification.get("reference", reference), verification.get("gateway_response", "failed"))
+        messages.error(request, "Payment was not successful. Please try again.")
+
+    return redirect("active_booking", booking_id=booking.id)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def payment_webhook(request):
+    signature = request.headers.get("X-Paystack-Signature", "")
+    raw_body = request.body
+
+    if not validate_webhook_signature(raw_body, signature):
+        return HttpResponse("invalid signature", status=400)
+
+    try:
+        payload = json.loads(raw_body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return HttpResponse("invalid payload", status=400)
+
+    processed, message = _process_webhook_payload(payload)
+    if not processed:
+        return HttpResponse(message, status=400)
+    return HttpResponse("ok", status=200)
+
+
+
+@login_required
+@require_GET
+def mock_checkout(request, booking_id):
+    booking = get_object_or_404(Booking.objects.select_related("family__user"), id=booking_id)
+    if request.user != booking.family.user:
+        messages.error(request, "Unauthorized.")
+        return redirect("/")
+
+    action = request.GET.get("action")
+    reference = request.GET.get("reference") or booking.checkout_reference
+    if not action:
+        return render(request, "families/mock_checkout.html", {"booking": booking, "reference": reference})
+
+    event = "charge.success" if action == "success" else "charge.failed"
+    payload = {"event": event, "data": {"reference": reference, "gateway_response": "mock"}}
+    _process_webhook_payload(payload)
+    return redirect(f"{reverse('payment_return')}?reference={reference}")
+
+
+@login_required
+@staff_member_required
+@require_http_methods(["POST"])
+def release_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    if booking.status != "escrow":
+        messages.error(request, "Booking must be in escrow before release.")
+        return redirect("active_booking", booking_id=booking.id)
+
+    booking.status = "released"
+    booking.save(update_fields=["status"])
+    PaymentEvent.objects.create(
+        booking=booking,
+        provider=booking.payment_provider,
+        reference=booking.provider_reference,
+        event_type="escrow.released",
+        status="processed",
+        message="Released by staff",
+    )
+    messages.success(request, "Escrow released to caregiver.")
+    return redirect("active_booking", booking_id=booking.id)
+
+
+@login_required
+@staff_member_required
+@require_http_methods(["POST"])
+def refund_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    if booking.status not in ["pending", "escrow"]:
+        messages.error(request, "Only pending or escrow bookings can be refunded.")
+        return redirect("active_booking", booking_id=booking.id)
+
+    booking.status = "refunded"
+    booking.last_payment_error = "Refunded by staff"
+    booking.save(update_fields=["status", "last_payment_error"])
+    PaymentEvent.objects.create(
+        booking=booking,
+        provider=booking.payment_provider,
+        reference=booking.provider_reference or booking.checkout_reference,
+        event_type="payment.refunded",
+        status="processed",
+        message="Refunded by staff",
+    )
+    messages.success(request, "Booking refunded.")
+    return redirect("active_booking", booking_id=booking.id)
 
 
 @login_required

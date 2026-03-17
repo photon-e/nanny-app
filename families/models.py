@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 User = settings.AUTH_USER_MODEL
@@ -101,6 +102,9 @@ class Booking(models.Model):
     provider_reference = models.CharField(
         max_length=255, blank=True, help_text="Gateway reference / transaction ID"
     )
+    checkout_reference = models.CharField(max_length=255, blank=True, db_index=True)
+    payment_verified_at = models.DateTimeField(null=True, blank=True)
+    last_payment_error = models.CharField(max_length=255, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)
     service_date = models.DateField(null=True, blank=True)
@@ -144,3 +148,27 @@ class CaregiverReview(models.Model):
 
     def __str__(self):
         return f"Review for Booking {self.booking_id} ({self.overall_rating}/5)"
+
+
+class PaymentEvent(models.Model):
+    EVENT_STATUS_CHOICES = [
+        ("received", "Received"),
+        ("processed", "Processed"),
+        ("ignored", "Ignored"),
+        ("failed", "Failed"),
+    ]
+
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name="payment_events")
+    provider = models.CharField(max_length=20)
+    reference = models.CharField(max_length=255, blank=True, db_index=True)
+    event_type = models.CharField(max_length=100)
+    status = models.CharField(max_length=20, choices=EVENT_STATUS_CHOICES, default="received")
+    message = models.CharField(max_length=255, blank=True)
+    payload = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.provider}:{self.event_type}:{self.reference}"

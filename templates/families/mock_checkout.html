@@ -1,0 +1,14 @@
+{% extends "layout/base.html" %}
+{% block title %}Mock Checkout{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto bg-white rounded-xl shadow p-6 mt-8">
+  <h1 class="text-xl font-bold mb-2">Mock Payment Checkout</h1>
+  <p class="text-sm text-gray-600 mb-4">Booking #{{ booking.id }} • Amount ₦{{ booking.amount }} • Ref {{ reference }}</p>
+
+  <div class="flex gap-3">
+    <a class="bg-emerald-600 text-white px-4 py-2 rounded" href="?reference={{ reference }}&action=success">Simulate Successful Payment</a>
+    <a class="bg-red-600 text-white px-4 py-2 rounded" href="?reference={{ reference }}&action=failed">Simulate Failed Payment</a>
+  </div>
+</div>
+{% endblock %}
