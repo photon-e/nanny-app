@@ -17,6 +17,17 @@
         <p><span class="font-semibold">Location:</span> {% if booking.service_location_lat and booking.service_location_lng %}{{ booking.service_location_lat }}, {{ booking.service_location_lng }}{% else %}Not set{% endif %}</p>
       </div>
       <div class="mt-4"><a href="{% url 'generate_agreement' booking.id %}" class="text-soft-teal text-sm font-medium">Regenerate Service Agreement →</a></div>
+      <div class="mt-4 flex flex-wrap gap-3">
+        {% if booking.status == "pending" and user == booking.family.user %}
+          <a href="{% url 'start_booking_checkout' booking.id %}" class="bg-soft-teal text-white px-3 py-2 rounded-lg text-sm">Continue payment checkout</a>
+        {% endif %}
+        {% if user.is_staff and booking.status == "escrow" %}
+          <form method="post" action="{% url 'release_booking' booking.id %}">{% csrf_token %}<button class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm">Release escrow</button></form>
+          <form method="post" action="{% url 'refund_booking' booking.id %}">{% csrf_token %}<button class="bg-red-600 text-white px-3 py-2 rounded-lg text-sm">Refund booking</button></form>
+        {% elif user.is_staff and booking.status == "pending" %}
+          <form method="post" action="{% url 'refund_booking' booking.id %}">{% csrf_token %}<button class="bg-red-600 text-white px-3 py-2 rounded-lg text-sm">Refund booking</button></form>
+        {% endif %}
+      </div>
     </div>
 
     <div class="bg-white rounded-xl shadow p-6 border">

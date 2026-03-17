@@ -89,7 +89,21 @@ DEFAULT_FROM_EMAIL = 'your-email@gmail.com'
 ```
 
 ### Payment Gateways
-Integrate Paystack/Flutterwave/Opay/Moniepoint in `families/views.py` `create_booking` function.
+The booking flow now supports checkout initialization, webhook verification, reconciliation, and escrow transitions:
+- Checkout init endpoint: `/families/booking/<booking_id>/checkout/`
+- Return/callback endpoint: `/families/payments/return/`
+- Webhook endpoint (HMAC SHA-512): `/families/payments/webhook/`
+
+Environment settings:
+```bash
+PAYMENT_GATEWAY_MODE=mock  # use `live` for provider API calls
+PAYSTACK_SECRET_KEY=...
+PAYSTACK_WEBHOOK_SECRET=...
+PAYSTACK_BASE_URL=https://api.paystack.co
+MOCK_WEBHOOK_SECRET=mock-webhook-secret
+```
+
+In mock mode, `/families/payments/mock/<booking_id>/` simulates success/failure callbacks to validate pending → escrow → released/refunded flows.
 
 ## Database
 

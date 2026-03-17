@@ -158,3 +158,11 @@ TEMPLATES[0]['DIRS'] = [BASE_DIR / 'templates']
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+
+# Payment gateway configuration
+PAYMENT_GATEWAY_MODE = os.getenv("PAYMENT_GATEWAY_MODE", "mock")
+PAYSTACK_SECRET_KEY = os.getenv("PAYSTACK_SECRET_KEY", "")
+PAYSTACK_WEBHOOK_SECRET = os.getenv("PAYSTACK_WEBHOOK_SECRET", PAYSTACK_SECRET_KEY)
+PAYSTACK_BASE_URL = os.getenv("PAYSTACK_BASE_URL", "https://api.paystack.co")
+MOCK_WEBHOOK_SECRET = os.getenv("MOCK_WEBHOOK_SECRET", "mock-webhook-secret")
