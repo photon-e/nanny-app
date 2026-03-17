@@ -2,8 +2,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.staticfiles.views import serve as serve_static
 
 urlpatterns = [
+    # Fallback static serving to avoid unstyled admin pages if platform static mapping is missing.
+    path('static/<path:path>', serve_static, {'insecure': True}),
     # Admin
     path('admin/', admin.site.urls),
 

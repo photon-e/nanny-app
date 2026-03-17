@@ -1,0 +1,32 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'core/admin-dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+  <section class="admin-kpi-grid" aria-label="Admin dashboard quick links">
+    <a class="admin-kpi-card" href="{% url 'admin:caregivers_caregiverprofile_changelist' %}">
+      <span class="admin-kpi-title">Caregiver approvals</span>
+      <span class="admin-kpi-subtitle">Review onboarding progress and profile verification.</span>
+    </a>
+    <a class="admin-kpi-card" href="{% url 'admin:core_dispute_changelist' %}">
+      <span class="admin-kpi-title">Dispute queue</span>
+      <span class="admin-kpi-subtitle">Resolve incidents and protect platform trust.</span>
+    </a>
+    <a class="admin-kpi-card" href="{% url 'admin:core_panicalert_changelist' %}">
+      <span class="admin-kpi-title">Panic alerts</span>
+      <span class="admin-kpi-subtitle">Track emergency events and acknowledge quickly.</span>
+    </a>
+    <a class="admin-kpi-card" href="{% url 'admin:families_booking_changelist' %}">
+      <span class="admin-kpi-title">Bookings & escrow</span>
+      <span class="admin-kpi-subtitle">Monitor payments, releases, and refunds.</span>
+    </a>
+  </section>
+
+  <div id="content-main">
+    {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+  </div>
+{% endblock %}
