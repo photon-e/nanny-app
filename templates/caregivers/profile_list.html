@@ -12,6 +12,11 @@
       {% else %}
         <p class="text-gray-600">Search by name, location, experience, or budget. View profiles and book with confidence.</p>
       {% endif %}
+      <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-gray-600">
+        <span class="inline-flex items-center rounded-full bg-white border border-gray-200 px-3 py-1">🔒 Identity checks</span>
+        <span class="inline-flex items-center rounded-full bg-white border border-gray-200 px-3 py-1">⭐ Real family reviews</span>
+        <span class="inline-flex items-center rounded-full bg-white border border-gray-200 px-3 py-1">⚡ Fast booking flow</span>
+      </div>
     </header>
 
     <!-- Search + filter bar -->
@@ -81,11 +86,11 @@
                   class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                 >
               {% else %}
-                <div class="w-full h-full flex items-center justify-center text-gray-400">
-                  <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                  </svg>
-                </div>
+                <img
+                  src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80"
+                  alt="Sample caregiver portrait"
+                  class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                >
               {% endif %}
             </div>
 
